@@ -3,6 +3,8 @@
  * Student ID: 12647996
  * 
  * This is the main class. 
+ * 
+ * Phase 1:
  * In this class a TextProcessing object is created and used to process a file by tokenizing it and computing the Two Grams and Palindromes in it.
  * 
  */
