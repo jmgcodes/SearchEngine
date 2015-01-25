@@ -1,0 +1,4 @@
+1	test file
+1	file test
+1	test tset
+1	tset file
