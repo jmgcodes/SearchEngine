@@ -35,7 +35,7 @@ public class SearchEngineMain{
 		System.out.println("\nPart2: Web Crawling\n-----------------------------------------------------------------\n");
 
 		 String crawlStorageFolder = "./Files/Dump";
-         int numberOfCrawlers = 2;
+         int numberOfCrawlers = 1;
 
          CrawlConfig config = new CrawlConfig();
          config.setCrawlStorageFolder(crawlStorageFolder);
@@ -56,7 +56,7 @@ public class SearchEngineMain{
           * URLs that are fetched and then the crawler starts following links
           * which are found in these pages
           */
-         controller.addSeed("http://www.ics.uci.edu/~lopes");
+         controller.addSeed("http://www.ics.uci.edu");
          //controller.addSeed("http://www.ics.uci.edu/~lopes/teaching");
          
          
@@ -82,10 +82,11 @@ public class SearchEngineMain{
          MyCrawler.writeDomainMap();
          
          controller.shutdown();
-         
+         System.out.println("Text process begins");
+
          // Text processing begins
          
-         
+         TextProcessingWebFiles.textProcessing("./Files/Result/IndexMap.txt");
          
          System.out.println("End");
 

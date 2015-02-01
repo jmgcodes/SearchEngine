@@ -29,7 +29,7 @@ public class MyCrawler extends WebCrawler {
 		
 		private static int shouldVisitCount = 0;
 		private static int visitedCount = 0;
-		private static String seedDomain = ".ics.uci.edu/~lopes";
+		private static String seedDomain = ".ics.uci.edu";
 		
 		private static Map<String, webPage> urlMap  = new HashMap<String, webPage>();
 		private static Map<String, Integer> domainMap = new TreeMap<String, Integer>();
@@ -68,22 +68,25 @@ public class MyCrawler extends WebCrawler {
             		   href = href.substring(0, href.length()-1);
                	  }
              	   
+            	  href = href.toLowerCase(); 
                	  int count = 0;
                	  
-               	webPage temp = new webPage();
+               	webPage temp;
                	
                	  if(urlMap.containsKey(href)){
                		  temp = urlMap.get(href);
                		  count = temp.pageCount;
                		  duplicatePage = true;
                	  }
+               	  else{
+               		 temp = new webPage();
+               	  }
                	  count++;
                	  temp.pageCount = count;
                	  urlMap.put(href, temp);
                	               	   
-            	   System.out.println("Should Visit URL: " + href);
+            	  // System.out.println("Should Visit URL: " + href);
             	   shouldVisitCount++;
-            	   
             	   
             	   // Domain Extraction
             	   
@@ -97,6 +100,7 @@ public class MyCrawler extends WebCrawler {
                 	  if(!duplicatePage)
                 		  domainMap.put(hrefDomain, countDomain);
                 	  
+
                 	// End
                }
 
@@ -108,36 +112,51 @@ public class MyCrawler extends WebCrawler {
          * to be processed by your program.
          */
         @Override
-        public void visit(Page page) {          
-                String url = page.getWebURL().getURL();
-         	  
+        public void visit(Page page) {     
+        	
+        	
+               String url = page.getWebURL().getURL();
+
          	   visitedCount++;
          	   
-         	   System.out.println("Visited URL: " + url);
+         	  // System.out.println("Visited URL: " + url);
          	
          	  if(url.endsWith("/")){
          		 url = url.substring(0, url.length()-1);
           	  }
+         	  
+         	  url = url.toLowerCase();
+           
                 if (page.getParseData() instanceof HtmlParseData) {
                         HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
                         String text = htmlParseData.getText();
                         String html = htmlParseData.getHtml();
                         List<WebURL> links = htmlParseData.getOutgoingUrls();
-
+                        
+                        /*
                         System.out.println("Text length: " + text.length());
                         System.out.println("Html length: " + html.length());
                         System.out.println("Number of outgoing links: " + links.size());
                     	System.out.println("--------------------------------------------------");
-
+						*/
                     	try {
+                    		
+                    		
 							String fileName = writeToFile(text);
 							
-			               	webPage temp = new webPage();
+			               	webPage temp;
 			               	
-			               	if(urlMap.containsKey(url)){
-			               		  temp = urlMap.get(url);
-			               		  temp.pageFileName = fileName;
-			               	  }
+			              //  System.out.println("Visited URL: " + url);
+			           	  // System.out.println(urlMap.containsKey("http://www.ics.uci.edu/~lopes/teaching/cs221w15/index.html"));
+			                
+			           	   //System.out.println("http://www.ics.uci.edu/~lopes/teaching/cs221W15/index.html".contains(url) + url);
+			               		if(urlMap.containsKey(url)){
+
+			               			temp = urlMap.get(url);
+			               			temp.pageFileName = fileName;
+			               			urlMap.put(url, temp);
+
+			               		}
 
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
@@ -207,9 +226,6 @@ public class MyCrawler extends WebCrawler {
         	
 
         	File fileDomainMap = new File("./Files/Result/Subdomains.txt");
-        	for(Map.Entry<String, Integer> each: domainMap.entrySet()){
-        		System.out.println(each.getKey() + ", " + each.getValue());
-        	}
 
 			if (!fileDomainMap.exists()) {
 				fileDomainMap.createNewFile();
