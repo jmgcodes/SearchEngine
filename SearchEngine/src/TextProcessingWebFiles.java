@@ -80,7 +80,7 @@ public class TextProcessingWebFiles{
 	 
 	 public static void fnCountWords(String fileName) throws FileNotFoundException{
 		 
-			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
+			FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName);
 			
 			BufferedReader bufferread = new BufferedReader(inputFile);
 			
@@ -91,7 +91,7 @@ public class TextProcessingWebFiles{
 				while((eachline = bufferread.readLine() ) != null){
 				eachline = eachline.trim();
 				if(!( eachline.isEmpty())){
-					String[] attr = eachline.toLowerCase().split("[^a-zA-Z0-9'-_@]+");
+					String[] attr = eachline.toLowerCase().split("[^a-zA-Z0-9]+");
 					
 					String Previous = "";
 					for(String word: attr){

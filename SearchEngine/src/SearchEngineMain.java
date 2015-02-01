@@ -35,12 +35,25 @@ public class SearchEngineMain{
 		System.out.println("\nPart2: Web Crawling\n-----------------------------------------------------------------\n");
 
 		 String crawlStorageFolder = "./Files/Dump";
-         int numberOfCrawlers = 1;
+         int numberOfCrawlers = 10;
 
          CrawlConfig config = new CrawlConfig();
          config.setCrawlStorageFolder(crawlStorageFolder);
-         config.setUserAgentString("testCrawler");
+         config.setUserAgentString("UCI WebCrawler 10604535 12647996 82721916");
          config.setPolitenessDelay(300);
+         
+         /*
+          * You can set the maximum crawl depth here. The default value is -1 for
+          * unlimited depth
+          */
+         config.setMaxDepthOfCrawling(10);
+
+         /*
+          * You can set the maximum number of pages to crawl. The default value
+          * is -1 for unlimited number of pages
+          */
+         config.setMaxPagesToFetch(1000);
+
 
          /*
           * Instantiate the controller for this crawl.
@@ -56,7 +69,7 @@ public class SearchEngineMain{
           * URLs that are fetched and then the crawler starts following links
           * which are found in these pages
           */
-         controller.addSeed("http://www.ics.uci.edu");
+         controller.addSeed("http://www.ics.uci.edu/");
          //controller.addSeed("http://www.ics.uci.edu/~lopes/teaching");
          
          

@@ -34,10 +34,11 @@ public class MyCrawler extends WebCrawler {
 		private static Map<String, webPage> urlMap  = new HashMap<String, webPage>();
 		private static Map<String, Integer> domainMap = new TreeMap<String, Integer>();
 		
-        private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" 
-                                                          + "|png|tiff?|mid|mp2|mp3|mp4"
-                                                          + "|wav|avi|mov|mpeg|ram|m4v|pdf|ppt|pptx" 
-                                                          + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+        private final static Pattern FILTERS = Pattern.compile(".*\\.(bmp|gif|jpe?g|png|tiff?|pdf|ico|xaml|pict|rif|pptx?|ps" +
+        														"|mid|mp2|mp3|mp4|wav|wma|au|aiff|flac|ogg|3gp|aac|amr|au|vox" +
+        														"|avi|mov|mpe?g|ra?m|m4v|smil|wm?v|swf|aaf|asf|flv|mkv" +
+        														"|zip|rar|gz|7z|aac|ace|alz|apk|arc|arj|dmg|jar|lzip|lha)" +
+                												"(\\?.*)?$"); // For url Query parts ( URL?q=... );
 
         
         public String extractDomain(String url){
@@ -165,6 +166,14 @@ public class MyCrawler extends WebCrawler {
                     	
                 }
                // printCount();
+                if(visitedCount % 100 == 0){
+                	try {
+						writeDomainMap();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                }
         }
         
         public String writeToFile(String text) throws IOException{
@@ -172,7 +181,7 @@ public class MyCrawler extends WebCrawler {
         	SecureRandom random = new SecureRandom();
         	String fileName =  new BigInteger(130, random).toString(32);
         	  fileName = visitedCount + fileName;
-        	File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
+        	File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName );
        	 
 			if (!fileText.exists()) {
 				fileText.createNewFile();
@@ -250,7 +259,7 @@ public class MyCrawler extends WebCrawler {
 				e.printStackTrace();
 			}
         	
-        	domainMap.clear();
+        	//domainMap.clear();
         }
 
 }
