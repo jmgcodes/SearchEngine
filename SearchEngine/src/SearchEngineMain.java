@@ -9,6 +9,7 @@
  * 
  */
 
+import java.util.Date;
 import java.util.Scanner;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
@@ -34,11 +35,12 @@ public class SearchEngineMain{
 		System.out.println("\nPart2: Web Crawling\n-----------------------------------------------------------------\n");
 
 		 String crawlStorageFolder = "./Files/Dump";
-         int numberOfCrawlers = 1;
+         int numberOfCrawlers = 2;
 
          CrawlConfig config = new CrawlConfig();
          config.setCrawlStorageFolder(crawlStorageFolder);
          config.setUserAgentString("testCrawler");
+         config.setPolitenessDelay(300);
 
          /*
           * Instantiate the controller for this crawl.
@@ -54,8 +56,8 @@ public class SearchEngineMain{
           * URLs that are fetched and then the crawler starts following links
           * which are found in these pages
           */
-         controller.addSeed("http://www.ics.uci.edu/~lopes/teaching/cs221W15/index.html#summaries");
-
+         controller.addSeed("http://www.ics.uci.edu/");
+         //controller.addSeed("http://www.ics.uci.edu/~lopes/teaching");
          /*
           * Start the crawl. This is a blocking operation, meaning that your code
           * will reach the line after this only when crawling is finished.
@@ -63,7 +65,18 @@ public class SearchEngineMain{
          
          System.out.println(config.toString());
          
-         controller.start(MyCrawler.class, numberOfCrawlers);  
+         Date dt1 = new Date();
+         controller.start(MyCrawler.class, numberOfCrawlers); 
+         Date dt2 = new Date();
+         
+			long diff = dt2.getTime() - dt1.getTime();
+			long diffSeconds = diff / 1000 % 60;
+			long diffMinutes = diff / (60 * 1000) % 60;
+			long diffHours = diff / (60 * 60 * 1000) % 24;
+
+         System.out.println("Time: " + diffHours + " hr " + diffMinutes + " m " + diffSeconds + " s");
+
+         MyCrawler.printCount();
          
          controller.shutdown();
          System.out.println("End");
