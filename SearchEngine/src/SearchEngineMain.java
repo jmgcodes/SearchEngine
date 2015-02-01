@@ -56,8 +56,10 @@ public class SearchEngineMain{
           * URLs that are fetched and then the crawler starts following links
           * which are found in these pages
           */
-         controller.addSeed("http://www.ics.uci.edu/");
+         controller.addSeed("http://www.ics.uci.edu/~lopes");
          //controller.addSeed("http://www.ics.uci.edu/~lopes/teaching");
+         
+         
          /*
           * Start the crawl. This is a blocking operation, meaning that your code
           * will reach the line after this only when crawling is finished.
@@ -76,9 +78,15 @@ public class SearchEngineMain{
 
          System.out.println("Time: " + diffHours + " hr " + diffMinutes + " m " + diffSeconds + " s");
 
-         MyCrawler.printCount();
+         MyCrawler.writeIndexMap();
+         MyCrawler.writeDomainMap();
          
          controller.shutdown();
+         
+         // Text processing begins
+         
+         
+         
          System.out.println("End");
 
 	}
