@@ -45,7 +45,8 @@ public class TextProcessingWebFiles{
 			eachline = eachline.trim();
 			if(!( eachline.isEmpty())){
 				String[] attr = eachline.split(",");
-				String textFileName = attr[2];
+				int fileIndex = attr.length - 1;
+				String textFileName = attr[fileIndex];
 				
 				if(!textFileName.equals("NA")){
 					fnCountWords(textFileName);
@@ -80,10 +81,18 @@ public class TextProcessingWebFiles{
 	 
 	 public static void fnCountWords(String fileName) throws FileNotFoundException{
 		 
-			FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName);
+			//FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName);
+			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
+
+      	  //File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName );
+      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
+
+			if (!fileText.exists()) {
+				return;
+			}
+
 			
 			BufferedReader bufferread = new BufferedReader(inputFile);
-			
 			String eachline;
 			
 			try

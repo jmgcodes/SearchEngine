@@ -59,11 +59,16 @@ public class MyCrawler extends WebCrawler {
         @Override
         public boolean shouldVisit(WebURL url) {
         	
+        	
         	boolean duplicatePage = false;
         	
                 String href = url.getURL().toLowerCase();
                 
                if(!FILTERS.matcher(href).matches() && href.contains(seedDomain)){
+                       	   
+            	   if(!(url.getDomain().equals("uci.edu"))){
+            		   return false;
+            	   }
             	   
             	   if(href.endsWith("/")){
             		   href = href.substring(0, href.length()-1);
@@ -181,8 +186,10 @@ public class MyCrawler extends WebCrawler {
         	SecureRandom random = new SecureRandom();
         	String fileName =  new BigInteger(130, random).toString(32);
         	  fileName = visitedCount + fileName;
-        	File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName );
-       	 
+        	
+        	  //File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName );
+        	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
+
 			if (!fileText.exists()) {
 				fileText.createNewFile();
 			}
