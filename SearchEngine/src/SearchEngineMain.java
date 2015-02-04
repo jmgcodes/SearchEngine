@@ -46,7 +46,7 @@ public class SearchEngineMain{
           * You can set the maximum crawl depth here. The default value is -1 for
           * unlimited depth
           */
-         config.setMaxDepthOfCrawling(10);
+         config.setMaxDepthOfCrawling(2);
 
          /*
           * You can set the maximum number of pages to crawl. The default value

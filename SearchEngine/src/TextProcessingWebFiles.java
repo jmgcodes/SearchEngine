@@ -13,7 +13,8 @@ import java.util.Map.Entry;
 
 
 public class TextProcessingWebFiles{
-	
+	 private static int maxCnt = 0;	
+	 private static String maxLink = "";
      private static Map<String, Integer>  wordList = new HashMap<String,Integer>();
      private static Map<String, Integer>  twoGramList = new HashMap<String,Integer>();
      private static List<String> stopWords = new ArrayList<String>(
@@ -44,12 +45,12 @@ public class TextProcessingWebFiles{
 			while((eachline = bufferread.readLine() ) != null){
 			eachline = eachline.trim();
 			if(!( eachline.isEmpty())){
-				String[] attr = eachline.split(",");
+				String[] attr = eachline.split(" ");
 				int fileIndex = attr.length - 1;
 				String textFileName = attr[fileIndex];
-				
+				String webLink  = attr[0];
 				if(!textFileName.equals("NA")){
-					fnCountWords(textFileName);
+					fnCountWords(textFileName, webLink);
 				}
 			}
 		  }
@@ -76,16 +77,17 @@ public class TextProcessingWebFiles{
 		
 		printTopCommonWords();
 		printTopTwoGrams();
+		printMaxWeblink();
 
 	}
 	 
-	 public static void fnCountWords(String fileName) throws FileNotFoundException{
+	 public static void fnCountWords(String fileName, String webLink) throws FileNotFoundException{
 		 
-			//FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName);
-			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
+			FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName);
+			//FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
 
-      	  //File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName );
-      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
+      	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName );
+      	  //File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
 
 			if (!fileText.exists()) {
 				return;
@@ -94,6 +96,7 @@ public class TextProcessingWebFiles{
 			
 			BufferedReader bufferread = new BufferedReader(inputFile);
 			String eachline;
+			int wordCnt = 0;
 			
 			try
 			{
@@ -109,6 +112,7 @@ public class TextProcessingWebFiles{
 							continue;
 						else{
 							
+							wordCnt++;
 							int count = 0;
 							if(wordList.containsKey(word)){
 								count = wordList.get(word);
@@ -143,6 +147,11 @@ public class TextProcessingWebFiles{
 			
 			finally
 			{
+				if(wordCnt > maxCnt){
+					maxCnt	= wordCnt;
+					maxLink = webLink;					
+				}
+				
 				try {
 					
 					if(bufferread != null)
@@ -152,9 +161,38 @@ public class TextProcessingWebFiles{
 				catch(IOException e){
 					System.out.println(e);
 				}
+				
 			}
-
 	 }
+	 
+	 
+	 public static void printMaxWeblink() throws IOException{
+		 File fileWeblink = new File("./Files/Result/maxWeblink.txt");
+	     	
+		 if (!fileWeblink.exists()) {
+			 fileWeblink.createNewFile();
+		 }
+
+		 FileWriter fwSample = new FileWriter(fileWeblink.getAbsoluteFile());
+		 BufferedWriter bwSample = new BufferedWriter(fwSample);
+	     	
+	     try {
+	    	bwSample.write(maxLink+ " " + maxCnt +"\n");
+	     				
+	     }catch (IOException e) {
+			   // TODO Auto-generated catch block
+		     e.printStackTrace();
+		 }
+	    
+	     	try {
+					bwSample.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+		 } 
+	 
 	 
 	 public static void printTopCommonWords() throws IOException{
 		 

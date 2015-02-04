@@ -37,7 +37,7 @@ public class MyCrawler extends WebCrawler {
         private final static Pattern FILTERS = Pattern.compile(".*\\.(bmp|gif|jpe?g|png|tiff?|pdf|ico|xaml|pict|rif|pptx?|ps" +
         														"|mid|mp2|mp3|mp4|wav|wma|au|aiff|flac|ogg|3gp|aac|amr|au|vox" +
         														"|avi|mov|mpe?g|ra?m|m4v|smil|wm?v|swf|aaf|asf|flv|mkv" +
-        														"|zip|rar|gz|7z|aac|ace|alz|apk|arc|arj|dmg|jar|lzip|lha)" +
+        														"|zip|rar|gz|	7z|aac|ace|alz|apk|arc|arj|dmg|jar|lzip|csv|lha)" +
                 												"(\\?.*)?$"); // For url Query parts ( URL?q=... );
 
         
@@ -187,8 +187,8 @@ public class MyCrawler extends WebCrawler {
         	String fileName =  new BigInteger(130, random).toString(32);
         	  fileName = visitedCount + fileName;
         	
-        	  //File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName );
-        	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
+        	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName );
+        	  //File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
 
 			if (!fileText.exists()) {
 				fileText.createNewFile();
@@ -220,7 +220,7 @@ public class MyCrawler extends WebCrawler {
         	for(Map.Entry<String, webPage> each: urlMap.entrySet()){
         		try {
         			//if(!(each.getValue().pageFileName.equals("NA"))){
-        				bwSample.write(each.getKey() + "," + each.getValue().pageCount + "," + each.getValue().pageFileName+"\n");
+        				bwSample.write(each.getKey() + " " + each.getValue().pageCount + " " + each.getValue().pageFileName+"\n");
         			//}
         			
 				} catch (IOException e) {
@@ -252,7 +252,7 @@ public class MyCrawler extends WebCrawler {
 
         	for(Map.Entry<String, Integer> each: domainMap.entrySet()){
         		try {
-        				bwSample.write(each.getKey() + "," + each.getValue()+"\n");
+        				bwSample.write(each.getKey() + " " + each.getValue()+"\n");
         			
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
