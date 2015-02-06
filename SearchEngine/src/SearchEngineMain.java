@@ -52,7 +52,7 @@ public class SearchEngineMain{
           * You can set the maximum number of pages to crawl. The default value
           * is -1 for unlimited number of pages
           */
-         config.setMaxPagesToFetch(150);
+         config.setMaxPagesToFetch(10);
 
 
          /*
