@@ -40,13 +40,13 @@ public class SearchEngineMain{
          CrawlConfig config = new CrawlConfig();
          config.setCrawlStorageFolder(crawlStorageFolder);
          config.setUserAgentString("UCI WebCrawler 10604535 12647996 82721916");
-         config.setPolitenessDelay(300);
+         config.setPolitenessDelay(500);
          
          /*
           * You can set the maximum crawl depth here. The default value is -1 for
           * unlimited depth
           */
-         config.setMaxDepthOfCrawling(2);
+         config.setMaxDepthOfCrawling(5);
 
          /*
           * You can set the maximum number of pages to crawl. The default value

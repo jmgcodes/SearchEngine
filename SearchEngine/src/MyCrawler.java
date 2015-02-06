@@ -148,7 +148,7 @@ public class MyCrawler extends WebCrawler {
                     	try {
                     		
                     		
-							String fileName = writeToFile(text);
+							String fileName = writeToFile(text, html);
 							
 			               	webPage temp;
 			               	
@@ -181,7 +181,7 @@ public class MyCrawler extends WebCrawler {
                 }
         }
         
-        public String writeToFile(String text) throws IOException{
+        public String writeToFile(String text, String html) throws IOException{
         	
         	SecureRandom random = new SecureRandom();
         	String fileName =  new BigInteger(130, random).toString(32);
@@ -200,6 +200,21 @@ public class MyCrawler extends WebCrawler {
 			bwSample.write(text);
 
 			bwSample.close();
+			
+			
+			File fileHtml = new File("/home/vijaykumar/IR_DUMP_HTML/" + fileName );
+      	  //File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
+
+			if (!fileHtml.exists()) {
+				fileHtml.createNewFile();
+			}
+
+			FileWriter fwHandle = new FileWriter(fileHtml.getAbsoluteFile());
+			BufferedWriter bwHandle = new BufferedWriter(fwHandle);
+
+			bwHandle.write(html);
+			
+			bwHandle.close();
 			return fileName;
         }
         
