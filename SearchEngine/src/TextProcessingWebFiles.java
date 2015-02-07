@@ -1,4 +1,10 @@
-
+/*
+ * Authors: Jwala Mohith Girisha, Rajani R Siddhanamatha, Vijaykumar Koppad
+ * Student ID: 12647996, 82721916, 10604535
+ * 
+ * The stored text files are tokenized and high frequency words and 2-grams are calculated.
+ *
+ */
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -83,11 +89,11 @@ public class TextProcessingWebFiles{
 	 
 	 public static void fnCountWords(String fileName, String webLink) throws FileNotFoundException{
 		 
-			FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
-			//FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+			//FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
+			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
 
-      	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
-      	  //File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+      	  //File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
+      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
 
 			if (!fileText.exists()) {
 				return;
@@ -180,14 +186,12 @@ public class TextProcessingWebFiles{
 	    	bwSample.write(maxLink+ " " + maxCnt +"\n");
 	     				
 	     }catch (IOException e) {
-			   // TODO Auto-generated catch block
 		     e.printStackTrace();
 		 }
 	    
 	     	try {
 					bwSample.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
@@ -225,14 +229,12 @@ public class TextProcessingWebFiles{
      					break;
      				}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
      	}
      	try {
 				bwSample.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -269,18 +271,13 @@ public class TextProcessingWebFiles{
 	     					break;
 	     				}
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 	     	}
 	     	try {
 					bwSample.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 		 }
-
-
 }

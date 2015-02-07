@@ -1,11 +1,14 @@
 /*
- * Author: Jwala Mohith Girisha
- * Student ID: 12647996
+ * Authors: Jwala Mohith Girisha, Rajani R Siddhanamatha, Vijaykumar Koppad
+ * Student ID: 12647996, 82721916, 10604535
  * 
  * This is the main class. 
  * 
- * Phase 1:
- * In this class a TextProcessing object is created and used to process a file by tokenizing it and computing the Two Grams and Palindromes in it.
+ * Part 1:
+ * In this a TextProcessing object is created and used to process a file by tokenizing it and computing the Two Grams and Palindromes in it.
+ * 
+ * Part 2:
+ * This covers the web crawling part of the search engine. The pages obtained by crawling are then processed to retrieve information about high frequency words.
  * 
  */
 
@@ -27,33 +30,30 @@ public class SearchEngineMain{
 	
 		System.out.println("Search Engine Implementation");
 	
-		System.out.println("\nPart1: Text Processing\n-----------------------------------------------------------------\n");
+		/******************* PART 1: Text processing **************************/
 		
+		//System.out.println("\nText Processing\n-----------------------------------------------------------------\n");
 		//TextProcessing txtProcObj = new TextProcessing();
 		//txtProcObj.fnBeginTextProcessing();
 		
-		System.out.println("\nPart2: Web Crawling\n-----------------------------------------------------------------\n");
+		/***************** PART 2: Web Crawler ******************************/
+		
+		System.out.println("\nWeb Crawling\n-----------------------------------------------------------------\n");
 
-		 String crawlStorageFolder = "./Files/Dump";
+		 String crawlStorageFolder = "./Files/Dump"; 
+		 
          int numberOfCrawlers = 10;
 
          CrawlConfig config = new CrawlConfig();
          config.setCrawlStorageFolder(crawlStorageFolder);
-         config.setUserAgentString("UCI WebCrawler 10604535 12647996 82721916");
-         config.setPolitenessDelay(500);
          
-         /*
-          * You can set the maximum crawl depth here. The default value is -1 for
-          * unlimited depth
-          */
-         config.setMaxDepthOfCrawling(5);
+         config.setUserAgentString("UCI WebCrawler 10604535 12647996 82721916");
+         
+         config.setPolitenessDelay(500); 
+    
+         config.setMaxDepthOfCrawling(30);
 
-         /*
-          * You can set the maximum number of pages to crawl. The default value
-          * is -1 for unlimited number of pages
-          */
          config.setMaxPagesToFetch(10);
-
 
          /*
           * Instantiate the controller for this crawl.
@@ -63,22 +63,17 @@ public class SearchEngineMain{
          RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
          CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
-         
          /*
           * For each crawl, you need to add some seed urls. These are the first
           * URLs that are fetched and then the crawler starts following links
           * which are found in these pages
           */
          controller.addSeed("http://www.ics.uci.edu/");
-         //controller.addSeed("http://www.ics.uci.edu/~lopes/teaching");
-         
-         
+                  
          /*
           * Start the crawl. This is a blocking operation, meaning that your code
           * will reach the line after this only when crawling is finished.
           */
-         
-         System.out.println(config.toString());
          
          Date dt1 = new Date();
          controller.start(MyCrawler.class, numberOfCrawlers); 
@@ -95,9 +90,10 @@ public class SearchEngineMain{
          MyCrawler.writeDomainMap();
          
          controller.shutdown();
-         System.out.println("Text process begins");
+        
+         System.out.println("Web crawling complete... \nText process begins");
 
-         // Text processing begins
+         // Text processing
          
          TextProcessingWebFiles.textProcessing("./Files/Result/IndexMap.txt");
          

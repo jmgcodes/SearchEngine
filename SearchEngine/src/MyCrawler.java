@@ -1,3 +1,13 @@
+/*
+ * Authors: Jwala Mohith Girisha, Rajani R Siddhanamatha, Vijaykumar Koppad
+ * Student ID: 12647996, 82721916, 10604535
+ * 
+ * This class extends the WebCrawler class and overrides its shouldVisit and visit methods.
+ * Visited urls and domains are tracked in maps.
+ * HTML and text data of crawled pages are stored into files for text processing. 
+ *
+ */
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,20 +29,20 @@ import edu.uci.ics.crawler4j.url.WebURL;
 public class MyCrawler extends WebCrawler {
 
 
-		private class webPage{
+		private class webPage{ // Custom webPage class
 	
-			public int pageCount = 0;
-			public int wordCount = 0;
+			public int pageCount = 0; 
 			public String pageFileName = "NA";
 			
 		}
 		
 		private static int shouldVisitCount = 0;
 		private static int visitedCount = 0;
-		private static String seedDomain = ".ics.uci.edu";
 		
-		private static Map<String, webPage> urlMap  = new HashMap<String, webPage>();
-		private static Map<String, Integer> domainMap = new TreeMap<String, Integer>();
+		private static String seedDomain = ".ics.uci.edu"; //Restricting it to this domain
+		
+		private static Map<String, webPage> urlMap  = new HashMap<String, webPage>(); //Stores all the urls found
+		private static Map<String, Integer> domainMap = new TreeMap<String, Integer>(); //Stores the domains visited
 		
         private final static Pattern FILTERS = Pattern.compile(".*\\.(bmp|gif|jpe?g|png|tiff?|pdf|ico|xaml|pict|rif|pptx?|ps" +
         														"|mid|mp2|mp3|mp4|wav|wma|au|aiff|flac|ogg|3gp|aac|amr|au|vox" +
@@ -41,9 +51,12 @@ public class MyCrawler extends WebCrawler {
                 												"(\\?.*)?$"); // For url Query parts ( URL?q=... );
 
         
-        public String extractDomain(String url){
+        // Extract the domain/sub-domain from the url
+        
+        public String extractDomain(String url){ 
         	
         	String strDomain = "";
+        	
         	int index = url.indexOf(seedDomain);
         	
         	strDomain = url.substring(0, index + seedDomain.length());
@@ -51,6 +64,7 @@ public class MyCrawler extends WebCrawler {
         	return strDomain;
         	
         }
+        
         /**
          * You should implement this function to specify whether
          * the given url should be crawled or not (based on your
@@ -66,10 +80,12 @@ public class MyCrawler extends WebCrawler {
                 
                if(!FILTERS.matcher(href).matches() && href.contains(seedDomain)){
                        	   
+            	   //Return false if uci.edu is not part of the domain name
             	   if(!(url.getDomain().equals("uci.edu"))){
             		   return false;
             	   }
             	   
+            	 
             	   if(href.endsWith("/")){
             		   href = href.substring(0, href.length()-1);
                	  }
@@ -79,6 +95,7 @@ public class MyCrawler extends WebCrawler {
                	  
                	webPage temp;
                	
+               	//Update the URLs Map
                	  if(urlMap.containsKey(href)){
                		  temp = urlMap.get(href);
                		  count = temp.pageCount;
@@ -91,23 +108,24 @@ public class MyCrawler extends WebCrawler {
                	  temp.pageCount = count;
                	  urlMap.put(href, temp);
                	               	   
-            	  // System.out.println("Should Visit URL: " + href);
-            	   shouldVisitCount++;
+
+               	  shouldVisitCount++;
             	   
             	   // Domain Extraction
             	   
             	   String hrefDomain = extractDomain(href);
+            	   
+            	   //Update the Domains map
             	   int countDomain = 0;
                 	  if(domainMap.containsKey(hrefDomain)){
                 		  countDomain = domainMap.get(hrefDomain);
                 	  }
                 	  countDomain++;
                 	  
+                	  //Do not count duplicate entries
                 	  if(!duplicatePage)
                 		  domainMap.put(hrefDomain, countDomain);
-                	  
-
-                	// End
+                	 
                }
 
                 return !FILTERS.matcher(href).matches() && href.contains(seedDomain);
@@ -124,9 +142,7 @@ public class MyCrawler extends WebCrawler {
                String url = page.getWebURL().getURL();
 
          	   visitedCount++;
-         	   
-         	  // System.out.println("Visited URL: " + url);
-         	
+         	            	
          	  if(url.endsWith("/")){
          		 url = url.substring(0, url.length()-1);
           	  }
@@ -137,25 +153,13 @@ public class MyCrawler extends WebCrawler {
                         HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
                         String text = htmlParseData.getText();
                         String html = htmlParseData.getHtml();
-                        List<WebURL> links = htmlParseData.getOutgoingUrls();
-                        
-                        /*
-                        System.out.println("Text length: " + text.length());
-                        System.out.println("Html length: " + html.length());
-                        System.out.println("Number of outgoing links: " + links.size());
-                    	System.out.println("--------------------------------------------------");
-						*/
-                    	try {
-                    		
+
+                        try {
                     		
 							String fileName = writeToFile(text, html);
 							
 			               	webPage temp;
 			               	
-			              //  System.out.println("Visited URL: " + url);
-			           	  // System.out.println(urlMap.containsKey("http://www.ics.uci.edu/~lopes/teaching/cs221w15/index.html"));
-			                
-			           	   //System.out.println("http://www.ics.uci.edu/~lopes/teaching/cs221W15/index.html".contains(url) + url);
 			               		if(urlMap.containsKey(url)){
 
 			               			temp = urlMap.get(url);
@@ -165,17 +169,14 @@ public class MyCrawler extends WebCrawler {
 			               		}
 
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
                     	
                 }
-               // printCount();
                 if(visitedCount % 100 == 0){
                 	try {
 						writeDomainMap();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
                 }
@@ -187,8 +188,8 @@ public class MyCrawler extends WebCrawler {
         	String fileName =  new BigInteger(130, random).toString(32);
         	  fileName = visitedCount + fileName;
         	
-        	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
-        	 // File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+        	 // File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
+        	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
 
 			if (!fileText.exists()) {
 				fileText.createNewFile();
@@ -202,8 +203,8 @@ public class MyCrawler extends WebCrawler {
 			bwSample.close();
 			
 			
-			File fileHtml = new File("/home/vijaykumar/IR_DUMP_HTML/" + fileName + ".html");
-      	  //File fileHtml = new File("/home/jgirisha/Documents/GitHub/IR_DUMP_HTML/" + fileName + ".html");
+			//File fileHtml = new File("/home/vijaykumar/IR_DUMP_HTML/" + fileName + ".html");
+      	  File fileHtml = new File("/home/jgirisha/Documents/GitHub/IR_DUMP_HTML/" + fileName + ".html");
 
 			if (!fileHtml.exists()) {
 				fileHtml.createNewFile();
@@ -234,19 +235,15 @@ public class MyCrawler extends WebCrawler {
 
         	for(Map.Entry<String, webPage> each: urlMap.entrySet()){
         		try {
-        			//if(!(each.getValue().pageFileName.equals("NA"))){
         				bwSample.write(each.getKey() + " " + each.getValue().pageCount + " " + each.getValue().pageFileName+"\n");
-        			//}
         			
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
         	}
         	try {
 				bwSample.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -270,18 +267,13 @@ public class MyCrawler extends WebCrawler {
         				bwSample.write(each.getKey() + " " + each.getValue()+"\n");
         			
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
         	}
         	try {
 				bwSample.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-        	
-        	//domainMap.clear();
         }
-
 }
