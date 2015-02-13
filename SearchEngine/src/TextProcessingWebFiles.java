@@ -16,13 +16,28 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
+class posObj{
+	 public int freq =0; // frequency of the word per document
+	 public List<Integer> position = new ArrayList<Integer>();
+}
+
+ 
 
 
 public class TextProcessingWebFiles{
-	 private static int maxCnt = 0;	
+	
+	 
+     private static int maxCnt = 0;	
 	 private static String maxLink = "";
-     private static Map<String, Integer>  wordList = new HashMap<String,Integer>();
-     private static Map<String, Integer>  twoGramList = new HashMap<String,Integer>();
+	 private static int docId = 0;
+	 private static Map<Integer, String>  webLinkID = new HashMap<Integer,String>();
+	 private static Map<Integer, posObj>  docMap =  new HashMap<Integer, posObj>();
+	 private static Map<String,  Map<Integer, posObj> >  wordMap = new HashMap<String, Map<Integer, posObj> >();
+	 
+	 // private static Map<String, ListdocObj>  wordList = new HashMap<String,Integer>();
+	 // private static Map<String, Integer>  wordList = new HashMap<String,Integer>();
+     //  private static Map<String, Integer>  twoGramList = new HashMap<String,Integer>();
+	 
      private static List<String> stopWords = new ArrayList<String>(
     		 Arrays.asList( "a","about","above","after","again","against","all","am","an","and","any","are","aren't",
     				 "as","at","be","because","been","before","being","below","between","both","but","by","can't","cannot",
@@ -38,6 +53,8 @@ public class TextProcessingWebFiles{
     				 "wouldn't","you","you'd","you'll","you're","you've","your","yours","yourself","yourselves")
     		 );
 	 
+     
+     
 	 public static void textProcessing (String filePath) throws IOException {
 			
 		FileReader inputFile = new FileReader(filePath);
@@ -45,6 +62,7 @@ public class TextProcessingWebFiles{
 		BufferedReader bufferread = new BufferedReader(inputFile);
 		
 		String eachline;
+		
 		
 		try
 		{
@@ -56,6 +74,8 @@ public class TextProcessingWebFiles{
 				String textFileName = attr[fileIndex];
 				String webLink  = attr[0];
 				if(!textFileName.equals("NA")){
+					docId++;
+					webLinkID.put(docId, webLink);
 					fnCountWords(textFileName, webLink);
 				}
 			}
@@ -81,28 +101,34 @@ public class TextProcessingWebFiles{
 		}
 		
 		
-		printTopCommonWords();
+		/*printTopCommonWords();
 		printTopTwoGrams();
-		printMaxWeblink();
+		printMaxWeblink();*/
+		
+		System.out.println(wordMap);
 
 	}
 	 
 	 public static void fnCountWords(String fileName, String webLink) throws FileNotFoundException{
 		 
 			//FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
-			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+			//FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+			FileReader inputFile = new FileReader("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
       	  //File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
-      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+      	  //File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+      	  File fileText = new File("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
 			if (!fileText.exists()) {
 				return;
 			}
-
+            
+			
 			
 			BufferedReader bufferread = new BufferedReader(inputFile);
 			String eachline;
 			int wordCnt = 0;
+			int wrdPos = 0; 
 			
 			try
 			{
@@ -114,18 +140,40 @@ public class TextProcessingWebFiles{
 					String Previous = "";
 					for(String word: attr){
 						
+						
+						
 						if(stopWords.contains(word) || word.length() < 2)
 							continue;
+						
 						else{
 							
-							wordCnt++;
-							int count = 0;
-							if(wordList.containsKey(word)){
-								count = wordList.get(word);
-							}
-							count++;
-							wordList.put(word, count);
+							wrdPos++;
+							posObj temppos;
+							Map<Integer, posObj> tempdocMap;						
 							
+							if(wordMap.containsKey(word)){
+								tempdocMap = wordMap.get(word);
+							}
+							else{
+								tempdocMap = new HashMap<Integer, posObj>();
+				
+							} 
+							
+							
+							if(tempdocMap.containsKey(docId)){
+								temppos = tempdocMap.get(docId);
+							}
+							else{
+								temppos = new posObj();
+							}
+							
+							temppos.freq++;
+							temppos.position.add(wrdPos);
+
+							tempdocMap.put(docId,temppos);
+							
+							wordMap.put(word, tempdocMap);
+							/*
 							String tokenTemp = "";
 							if(Previous == ""){
 								Previous = word;
@@ -138,7 +186,7 @@ public class TextProcessingWebFiles{
 							
 							Integer count1 = twoGramList.get(tokenTemp);
 							count1 = (count1 == null) ? 1 : ++count1;
-							twoGramList.put(tokenTemp, count1);
+							twoGramList.put(tokenTemp, count1);*/
 
 						}
 					}
@@ -197,7 +245,7 @@ public class TextProcessingWebFiles{
 
 		 } 
 	 
-	 
+	 /*
 	 public static void printTopCommonWords() throws IOException{
 		 
      	File fileDomainMap = new File("./Files/Result/Words.txt");
@@ -210,12 +258,12 @@ public class TextProcessingWebFiles{
 			FileWriter fwSample = new FileWriter(fileDomainMap.getAbsoluteFile());
 			BufferedWriter bwSample = new BufferedWriter(fwSample);
 
-			List<Entry<String, Integer>> wordPairList = new ArrayList<Entry<String, Integer>>(wordList.entrySet());
-			Collections.sort( wordPairList, new Comparator<Map.Entry<String, Integer>>()
+			List<Entry<String, DocAttributes>> wordPairList = new ArrayList<Entry<String, DocAttributes>>(wordList.entrySet());
+			Collections.sort( wordPairList, new Comparator<Map.Entry<String, DocAttributes>>()
 			{
-				public int compare( Map.Entry<String, Integer> mapEntry1, Map.Entry<String, Integer> mapEntry2 )
+				public int compare( Map.Entry<String, DocAttributes> mapEntry1, Map.Entry<String, DocAttributes> mapEntry2 )
 				{
-					return (mapEntry2.getValue()).compareTo( mapEntry1.getValue() );
+					return (mapEntry2.getValue().freq).compareTo( mapEntry1.getValue().freq );
 				}
 			} );
 
@@ -279,5 +327,5 @@ public class TextProcessingWebFiles{
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-		 }
+		 }*/
 }
