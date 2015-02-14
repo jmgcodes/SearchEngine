@@ -51,29 +51,28 @@ public class SearchEngineMain{
          
          config.setPolitenessDelay(500); 
     
-         config.setMaxDepthOfCrawling(30);
+         config.setMaxDepthOfCrawling(80);
 
-         config.setMaxPagesToFetch(10);
+         config.setMaxPagesToFetch(5);
 
-         /*
-          * Instantiate the controller for this crawl.
-          */
+         // Instantiate the controller for this crawl.
+          
          PageFetcher pageFetcher = new PageFetcher(config);
          RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
          RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
          CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
-         /*
-          * For each crawl, you need to add some seed urls. These are the first
-          * URLs that are fetched and then the crawler starts following links
-          * which are found in these pages
-          */
-         controller.addSeed("http://www.ics.uci.edu/");
+         
+         // For each crawl, you need to add some seed urls. These are the first
+         // URLs that are fetched and then the crawler starts following links
+         // which are found in these pages
+          
+         controller.addSeed("http://www.ics.uci.edu/~lopes/index.html");
                   
-         /*
-          * Start the crawl. This is a blocking operation, meaning that your code
-          * will reach the line after this only when crawling is finished.
-          */
+         
+         // Start the crawl. This is a blocking operation, meaning that your code
+         // will reach the line after this only when crawling is finished.
+          
          
          Date dt1 = new Date();
          controller.start(MyCrawler.class, numberOfCrawlers); 
@@ -98,6 +97,23 @@ public class SearchEngineMain{
          TextProcessingWebFiles.textProcessing("./Files/Result/IndexMap.txt");
          
          System.out.println("End");
+		
+		
+		/***************** PART 3: Indexing ******************************/
+		
+		
+		while(true){
+			
+			System.out.println("Enter the string to search");
+			
+			String search = in.nextLine();
+			
+			MongoDB.fnFind(search);
+			
+			
+		
+		}
+		
 
 	}
 	
