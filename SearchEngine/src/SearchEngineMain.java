@@ -101,6 +101,7 @@ public class SearchEngineMain{
 		
 		/***************** PART 3: Indexing ******************************/
 		
+		MongoDB.fnCalculateTFIDF();
 		
 		while(true){
 			
