@@ -70,7 +70,7 @@ public class MongoDB{
                      
                       List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
 
-               	  temp.add(new BasicDBObject("docInst",new BasicDBObject("id",docID).append("pos", pos.getPos()).append("frequency", pos.getFreq())));
+               	  temp.add(new BasicDBObject("id",docID).append("pos", pos.getPos()).append("frequency", pos.getFreq()));
                      obj.put("doc", temp);
                      coll.save(obj); 
                      
@@ -79,7 +79,7 @@ public class MongoDB{
                 	  
                      // System.out.println("Create");
                 	  List<BasicDBObject> listObj = new ArrayList<BasicDBObject>();
-                	  listObj.add(new BasicDBObject("docInst",new BasicDBObject("id",docID).append("pos", pos.getPos()).append("frequency", pos.getFreq())));
+                	  listObj.add(new BasicDBObject("id",docID).append("pos", pos.getPos()).append("frequency", pos.getFreq()));
                 	  
                       coll.insert(new BasicDBObject("doc",listObj).
                     		  append("word",word));
@@ -121,8 +121,7 @@ public class MongoDB{
 
             for(BasicDBObject tempObj: temp){
             	
-            	tempObj = (BasicDBObject)tempObj.get("docInst");
-            	
+            	//tempObj = (BasicDBObject)tempObj.get("docInst");
             	
                 BasicDBObject queryUrl = new BasicDBObject();
                 queryUrl.put("docID", tempObj.get("id"));
@@ -193,17 +192,18 @@ public class MongoDB{
             List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
 
             int NT = temp.size();
-            
-            for(BasicDBObject tempObj: temp){
+
+            for(BasicDBObject tempInstObj: temp){
             	
-            	BasicDBObject tempInstObj = (BasicDBObject)tempObj.get("docInst");
+            	//BasicDBObject tempInstObj = (BasicDBObject)tempObj.get("docInst");
             	
             	int tf = (int)tempInstObj.get("frequency");
             	
-            	double tfidf = (Math.log(1+tf))*(Math.log(N/NT));
-            	
-            	tempInstObj.put("tfidf", tfidf);
-            	tempObj.put("docInst", tempInstObj);
+               // System.out.println("Word: " + obj.get("word")+" || NT: " + NT + " || TF: " + tf);
+                double tfidf = (Math.log(1+tf))*(Math.log((float)N/NT));
+
+                tempInstObj.put("tfidf", tfidf);
+            	//tempObj.put("docInst", tempInstObj);
             	obj.put("doc", temp);
             	coll1.save(obj);
             	

@@ -37,7 +37,7 @@ public class SearchEngineMain{
 		//txtProcObj.fnBeginTextProcessing();
 		
 		/***************** PART 2: Web Crawler ******************************/
-		
+		/*
 		System.out.println("\nWeb Crawling\n-----------------------------------------------------------------\n");
 
 		 String crawlStorageFolder = "./Files/Dump"; 
@@ -49,7 +49,7 @@ public class SearchEngineMain{
          
          config.setUserAgentString("UCI WebCrawler 10604535 12647996 82721916");
          
-         config.setPolitenessDelay(500); 
+         config.setPolitenessDelay(300); 
     
          config.setMaxDepthOfCrawling(80);
 
@@ -91,7 +91,7 @@ public class SearchEngineMain{
          controller.shutdown();
         
          System.out.println("Web crawling complete... \nText process begins");
-
+		 */
          // Text processing
          
          TextProcessingWebFiles.textProcessing("./Files/Result/IndexMap.txt");

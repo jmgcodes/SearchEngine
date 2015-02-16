@@ -127,7 +127,7 @@ public class TextProcessingWebFiles{
 		}
 		
 		
-		printTopCommonWords();
+		//printTopCommonWords();
 		/*printTopTwoGrams();
 		printMaxWeblink();*/
 		
@@ -137,12 +137,14 @@ public class TextProcessingWebFiles{
 	 public static void fnCountWords(String fileName, String webLink) throws FileNotFoundException{
 		 
 			//FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
-			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+			//FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
 			//FileReader inputFile = new FileReader("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
       	  //File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
-      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
-      	  //File fileText = new File("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
+      	  //File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+	      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
+	      	  //File fileText = new File("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
 			if (!fileText.exists()) {
 				return;
@@ -208,7 +210,7 @@ public class TextProcessingWebFiles{
 							
 							wordMap.put(word, tempdocMap);
 							
-							System.out.println(word + "---" +temppos.getPos());
+							//System.out.println(word + "---" +temppos.getPos());
 							/*
 							String tokenTemp = "";
 							if(Previous == ""){
