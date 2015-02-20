@@ -188,8 +188,8 @@ public class MyCrawler extends WebCrawler {
         	String fileName =  new BigInteger(130, random).toString(32);
         	  fileName = visitedCount + fileName;
         	
-        	 // File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
-        	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+        	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
+//        	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
 
 			if (!fileText.exists()) {
 				fileText.createNewFile();
@@ -203,8 +203,8 @@ public class MyCrawler extends WebCrawler {
 			bwSample.close();
 			
 			
-			//File fileHtml = new File("/home/vijaykumar/IR_DUMP_HTML/" + fileName + ".html");
-      	  File fileHtml = new File("/home/jgirisha/Documents/GitHub/IR_DUMP_HTML/" + fileName + ".html");
+			File fileHtml = new File("/home/vijaykumar/IR_DUMP_HTML/" + fileName + ".html");
+//      	  File fileHtml = new File("/home/jgirisha/Documents/GitHub/IR_DUMP_HTML/" + fileName + ".html");
 
 			if (!fileHtml.exists()) {
 				fileHtml.createNewFile();

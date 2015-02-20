@@ -79,6 +79,8 @@ public class TextProcessingWebFiles{
 		
 		String eachline;
 		
+		MongoDB Mdb = new MongoDB();
+		
 		
 		try
 		{
@@ -92,18 +94,22 @@ public class TextProcessingWebFiles{
 				if(!textFileName.equals("NA")){
 					fnCountWords(textFileName, webLink);
 				}
+				if(docId % 100 == 0){
+					System.out.printf("Processing docs %d and %d ... \n", docId, docId+100);
+				}
 				
-				if(docId%2 == 0){
-					
-					MongoDB.fnMongo(wordMap);
+				if(docId%10000 == 0){	
+					Mdb.fnMongo(wordMap);
 					wordMap.clear();
+					Mdb.fnWriteDocMap(webLinkID);
+					webLinkID.clear();
 				}
 			}
 		  }
-			MongoDB.fnMongo(wordMap);
+			Mdb.fnMongo(wordMap);
 			wordMap.clear();
 			
-			MongoDB.fnWriteDocMap(webLinkID);
+			Mdb.fnWriteDocMap(webLinkID);
 			webLinkID.clear();
 
 		}
@@ -136,14 +142,14 @@ public class TextProcessingWebFiles{
 	 
 	 public static void fnCountWords(String fileName, String webLink) throws FileNotFoundException{
 		 
-			//FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
-			//FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
-			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
+			FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName );
+//			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
+//			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
 			//FileReader inputFile = new FileReader("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
-      	  //File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
+      	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName);
       	  //File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
-	      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
+//	      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
 	      	  //File fileText = new File("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
 			if (!fileText.exists()) {

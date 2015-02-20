@@ -100,8 +100,9 @@ public class SearchEngineMain{
 		
 		
 		/***************** PART 3: Indexing ******************************/
+		MongoDB Mdb = new MongoDB();
 		
-		MongoDB.fnCalculateTFIDF();
+		Mdb.fnCalculateTFIDF();
 		
 		while(true){
 			
@@ -109,7 +110,7 @@ public class SearchEngineMain{
 			
 			String search = in.nextLine();
 			
-			MongoDB.fnFind(search);
+			Mdb.fnFind(search);
 			
 			
 		

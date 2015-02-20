@@ -17,18 +17,25 @@ import java.math.*;
 
 public class MongoDB{
 	
-	 
+	static MongoClient mongoClient;
+	static DB db;
+	static DBCollection coll;
+	static DBCollection coll1;
 	
-   public static void fnMongo(Map<String,  Map<String, posObj>> wordMap){
+	MongoDB() throws UnknownHostException {
+	  // To connect to mongodb server
+		mongoClient = new MongoClient( "localhost" , 27017 );
+    // Now connect to your databases
+		db = mongoClient.getDB("InvertedIndex");
+   // System.out.println("Connect to database successfully");
+		coll = db.getCollection("InvIndex");
+   // System.out.println("Collection mycol selected successfully");
+	    coll1 = db.getCollection("DocMap");
+	}
+	
+   public  void fnMongo(Map<String,  Map<String, posObj>> wordMap){
       try{   
     	  
-    	  // To connect to mongodb server
-    	    MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
-    	    // Now connect to your databases
-    	    DB db = mongoClient.getDB("InvertedIndex");
-    	   // System.out.println("Connect to database successfully");
-    	    DBCollection coll = db.getCollection("InvIndex");
-    	   // System.out.println("Collection mycol selected successfully");
           
           Map<String, Map<String, List<Integer>>> wordList = new HashMap<String, Map<String, List<Integer>>>();
           Map<String, posObj> docList = new HashMap<String, posObj>();
@@ -91,21 +98,23 @@ public class MongoDB{
         	  }
         	  
           }
+//          mongoClient.close();
           
       }catch(Exception e){
 	     System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 	  }
+      
    }
    
-   public static void fnFind(String search) throws UnknownHostException{
+   public void fnFind(String search) throws UnknownHostException{
 	   
 	   // To connect to mongodb server
-	    MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
+//	    MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
 	    // Now connect to your databases
-	    DB db = mongoClient.getDB("InvertedIndex");
+//	    DB db = mongoClient.getDB("InvertedIndex");
 	   // System.out.println("Connect to database successfully");
-	    DBCollection coll = db.getCollection("InvIndex");
-	    DBCollection coll1 = db.getCollection("DocMap");
+//	    DBCollection coll = db.getCollection("InvIndex");
+//	    DBCollection coll1 = db.getCollection("DocMap");
 
 	   // System.out.println("Collection mycol selected successfully");
 	    
@@ -142,17 +151,19 @@ public class MongoDB{
         	System.out.println("Sorry! Word not found");
 
         }
+        
+//        mongoClient.close();
    }
    
    
-   public static void fnWriteDocMap(Map<String, String> docMap) throws UnknownHostException{
+   public void fnWriteDocMap(Map<String, String> docMap) throws UnknownHostException{
 	   
 	   // To connect to mongodb server
-	    MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
+//	    MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
 	    // Now connect to your databases
-	    DB db = mongoClient.getDB("InvertedIndex");
+//	    DB db = mongoClient.getDB("InvertedIndex");
 	   // System.out.println("Connect to database successfully");
-	    DBCollection coll = db.getCollection("DocMap");
+//	    DBCollection coll = db.getCollection("DocMap");
 	   // System.out.println("Collection mycol selected successfully");
 
 	    Iterator itr = docMap.keySet().iterator();
@@ -161,29 +172,30 @@ public class MongoDB{
 	    	String id = (String)itr.next();
 	    	String url = docMap.get(id);
 	    	
-            coll.insert(new BasicDBObject("docID",id).
+            coll1.insert(new BasicDBObject("docID",id).
           		  append("url",url));
 
 	    }
-	   
+	    
+//	    mongoClient.close();
    }
    
-   public static void fnCalculateTFIDF() throws UnknownHostException{
+   public void fnCalculateTFIDF() throws UnknownHostException{
 	   
 	   // To connect to mongodb server
-	    MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
+//	    MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
 	    // Now connect to your databases
-	    DB db = mongoClient.getDB("InvertedIndex");
+//	    DB db = mongoClient.getDB("InvertedIndex");
 	   // System.out.println("Connect to database successfully");
-	    DBCollection coll = db.getCollection("DocMap");
+//	    DBCollection coll = db.getCollection("DocMap");
 	   // System.out.println("Collection mycol selected successfully");
 
-        DBCursor cursor = coll.find();
+        DBCursor cursor = coll1.find();
         int N = cursor.length();
         System.out.println("N: " + cursor.length());
 	   
-	    DBCollection coll1 = db.getCollection("InvIndex");
-        DBCursor cursor1 = coll1.find();
+	    DBCollection coll = db.getCollection("InvIndex");
+        DBCursor cursor1 = coll.find();
         
         while(cursor1.hasNext()){
         	
@@ -205,12 +217,13 @@ public class MongoDB{
                 tempInstObj.put("tfidf", tfidf);
             	//tempObj.put("docInst", tempInstObj);
             	obj.put("doc", temp);
-            	coll1.save(obj);
+            	coll.save(obj);
             	
             }
 
         	
         }
+//        mongoClient.close();
 
         
    }
