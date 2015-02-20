@@ -17,9 +17,19 @@ import java.util.*;
 import java.util.Map.Entry;
 
 class posObj{
+	 private String docID = "";
 	 private int freq =0; // frequency of the word per document
 	 private List<Integer> position = new ArrayList<Integer>();
 	 
+	 
+	 public void setDocID(String docID){
+		 this.docID = docID;
+	 }
+	 
+	 public String getDocID(){
+		 return this.docID;
+	 }
+
 	 public void incFreq(){
 		 this.freq++;
 	 }
@@ -47,8 +57,7 @@ public class TextProcessingWebFiles{
 	 private static String maxLink = "";
 	 private static int docId = 0;
 	 private static Map<String, String>  webLinkID = new HashMap<String,String>();
-	 private static Map<String, posObj>  docMap =  new HashMap<String, posObj>();
-	 private static Map<String,  Map<String, posObj> >  wordMap = new HashMap<String, Map<String, posObj> >();
+	 private static Map<String,  List<posObj> >  wordMap = new HashMap<String, List<posObj> >();
 	 
 	 // private static Map<String, ListdocObj>  wordList = new HashMap<String,Integer>();
 	  private static Map<String, Integer>  wordList = new HashMap<String,Integer>();
@@ -142,14 +151,14 @@ public class TextProcessingWebFiles{
 	 
 	 public static void fnCountWords(String fileName, String webLink) throws FileNotFoundException{
 		 
-			FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName );
+//			FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName );
 //			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
-//			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
+			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
 			//FileReader inputFile = new FileReader("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
-      	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName);
+//      	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName);
       	  //File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
-//	      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
+	      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
 	      	  //File fileText = new File("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
 			if (!fileText.exists()) {
@@ -190,31 +199,40 @@ public class TextProcessingWebFiles{
 							
 							wrdPos++;
 							posObj temppos;
-							Map<String, posObj> tempdocMap;						
+							List<posObj> tempdocList;
+							boolean flag = true;
 							
 							if(wordMap.containsKey(word)){
-								tempdocMap = wordMap.get(word);
+								tempdocList = wordMap.get(word);
+								
+								int size = tempdocList.size();
+								temppos = (posObj)tempdocList.get(size-1);
+								
+								if(temppos.getDocID() == strDocID){
+									flag = false;
+								}
+								else{
+									temppos = new posObj();
+									temppos.setDocID(strDocID);
+								}
+
 							}
 							else{
-								tempdocMap = new HashMap<String, posObj>();
-				
+								tempdocList = new ArrayList<posObj>();
+								temppos = new posObj();
+								temppos.setDocID(strDocID);
+
 							} 
 							
-							
-							if(tempdocMap.containsKey(strDocID)){
-								temppos = tempdocMap.get(strDocID);
-							}
-							else{
-								temppos = new posObj();
-							}
 							
 							temppos.incFreq();
 							temppos.add(wrdPos);
 							//temppos.position.add(wrdPos);
 
-							tempdocMap.put(strDocID,temppos);
+							if(flag)
+								tempdocList.add(temppos);
 							
-							wordMap.put(word, tempdocMap);
+							wordMap.put(word, tempdocList);
 							
 							//System.out.println(word + "---" +temppos.getPos());
 							/*

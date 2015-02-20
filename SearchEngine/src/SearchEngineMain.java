@@ -94,9 +94,9 @@ public class SearchEngineMain{
 		 */
          // Text processing
          
-         TextProcessingWebFiles.textProcessing("./Files/Result/IndexMap.txt");
+   TextProcessingWebFiles.textProcessing("./Files/Result/IndexMap.txt");
          
-         System.out.println("End");
+        System.out.println("End");
 		
 		
 		/***************** PART 3: Indexing ******************************/

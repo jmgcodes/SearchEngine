@@ -33,69 +33,66 @@ public class MongoDB{
 	    coll1 = db.getCollection("DocMap");
 	}
 	
-   public  void fnMongo(Map<String,  Map<String, posObj>> wordMap){
+   public  void fnMongo(Map<String,  List<posObj>> wordMap){
       try{   
     	  
+          int count = 0;
           
           Map<String, Map<String, List<Integer>>> wordList = new HashMap<String, Map<String, List<Integer>>>();
-          Map<String, posObj> docList = new HashMap<String, posObj>();
+          List<posObj> docList = new ArrayList<posObj>();
           posObj pos = new posObj();
           
           Map<String, posObj> docListDB = new HashMap<String, posObj>();
           posObj posDB = new posObj();
 
-         // System.out.println("Map" + wordMap);
+          System.out.println("Mapsize: " + wordMap.size());
 
           Iterator iterMap = wordMap.keySet().iterator();
           while(iterMap.hasNext()){
         	  
+        	  if(count%1000==0)
+        		  System.out.println("Storing word " + count + " to " + count+1000);
+        		  
+        	  count++;
+
         	  String word = (String)iterMap.next();
         	  docList = wordMap.get(word);
         	  
-        	  Iterator iterMap1 = docList.keySet().iterator();
-        	  while(iterMap1.hasNext()){
-        		  
-        		  String docID = (String)iterMap1.next();
-        		  pos = docList.get(docID);        		  
-        		  //System.out.println(pos.position);
-        		  //System.out.println(pos.freq);
-        		  //Check DB and add/update
-        		  
-                  BasicDBObject query = new BasicDBObject();
-                  query.put("word", word);
+              BasicDBObject query = new BasicDBObject();
+              query.put("word", word);
+              
+              DBCursor cursor = coll.find(query);
+              if (cursor.hasNext()) { 
+            	  
+                  DBObject obj = (DBObject) cursor.next();
                   
-                  DBCursor cursor = coll.find(query);
-                  if (cursor.hasNext()) { 
-                	  
-                      DBObject obj = (DBObject) cursor.next();
-                      String strDocID = docID.toString();
-                      
-                    // System.out.println(obj.get("word")); 
-                    // System.out.println(obj.get("doc"));
-                     
-                     //docListDB = (Map<String, posObj>) obj.get("doc");
-                     
-                      List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
+                 //System.out.println("Found " + obj.get("word") + " " + obj.get("doc")); 
+                 
+                  List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
 
-               	  temp.add(new BasicDBObject("id",docID).append("pos", pos.getPos()).append("frequency", pos.getFreq()));
-                     obj.put("doc", temp);
-                     coll.save(obj); 
-                     
+                  for(posObj tempposobj: docList){
+                   	  temp.add(new BasicDBObject("id",tempposobj.getDocID()).append("pos", tempposobj.getPos()).append("frequency", tempposobj.getFreq()));
                   }
-                  else{
-                	  
-                     // System.out.println("Create");
-                	  List<BasicDBObject> listObj = new ArrayList<BasicDBObject>();
-                	  listObj.add(new BasicDBObject("id",docID).append("pos", pos.getPos()).append("frequency", pos.getFreq()));
-                	  
-                      coll.insert(new BasicDBObject("doc",listObj).
-                    		  append("word",word));
-
-                	  
+                 obj.put("doc", temp);
+                 coll.save(obj); 
+                 
+              }
+              else{
+            	  
+                  //System.out.println("Create " + word);
+                  
+            	  List<BasicDBObject> listObj = new ArrayList<BasicDBObject>();
+            	  
+                  for(posObj tempposobj: docList){
+                	  listObj.add(new BasicDBObject("id",tempposobj.getDocID()).append("pos", tempposobj.getPos()).append("frequency", tempposobj.getFreq()));
                   }
+                  
+                  coll.insert(new BasicDBObject("doc",listObj).
+                		  append("word",word));
 
-        		  
-        	  }
+            	  
+              }
+
         	  
           }
 //          mongoClient.close();
@@ -202,7 +199,7 @@ public class MongoDB{
             DBObject obj = (DBObject) cursor1.next();
             
             List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
-
+            List<BasicDBObject> tempnew = new ArrayList<BasicDBObject>();
             int NT = temp.size();
 
             for(BasicDBObject tempInstObj: temp){
@@ -215,12 +212,11 @@ public class MongoDB{
                 double tfidf = (Math.log(1+tf))*(Math.log((float)N/NT));
 
                 tempInstObj.put("tfidf", tfidf);
-            	//tempObj.put("docInst", tempInstObj);
-            	obj.put("doc", temp);
-            	coll.save(obj);
+                tempnew.add(tempInstObj);
             	
             }
-
+        	obj.put("doc", tempnew);
+        	coll.save(obj);
         	
         }
 //        mongoClient.close();
