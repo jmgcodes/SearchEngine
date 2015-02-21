@@ -10,6 +10,7 @@ import com.mongodb.ServerAddress;
 
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.Map.Entry;
 import java.math.*;
 
 
@@ -126,6 +127,161 @@ public class MongoDB{
         }
         
    }
+   
+   
+   public void fnSearch(String search) throws UnknownHostException{
+	   	   
+	   String[] searchArr = search.split(" ");
+	   
+	   Map<String,Integer> AndOrMap = new HashMap<String, Integer>();
+	   
+	   for(String word: searchArr){
+		   
+		   BasicDBObject query = new BasicDBObject();
+	       query.put("word", word);
+	       DBCursor cursor = coll.find(query);
+	       
+	       if (cursor.hasNext()) {   
+	           DBObject obj = (DBObject) cursor.next();	                     
+	           List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
+	           
+	           for(BasicDBObject tempObj: temp){
+	        	   int count = 0;
+	        	   String docid = tempObj.get("id").toString();
+	        	   if(AndOrMap.containsKey(docid)){
+	        		   count = AndOrMap.get(docid);
+	        	   }
+	        	   AndOrMap.put(docid, count+1);
+	           }
+	       } 
+	   }
+	   
+	   if(AndOrMap.size() == 0){
+		   
+		   System.out.println("Not found\n");
+		   return;
+		   
+	   }
+		   
+	   
+	   Map<String,Integer> AndOrMapHigh = new HashMap<String, Integer>();
+	   
+	   	List<Entry<String, Integer>> AndOrList = new ArrayList<Entry<String, Integer>>(AndOrMap.entrySet());
+	   	List<Entry<String, Integer>> AndOrListLow = new ArrayList<Entry<String, Integer>>();
+
+		for(Map.Entry<String, Integer> mapEntry:AndOrList){
+
+			if(mapEntry.getValue() > 1){
+				
+				AndOrMapHigh.put(mapEntry.getKey(), mapEntry.getValue());
+			}
+			else{
+				AndOrListLow.add(mapEntry);
+			}
+	
+		}
+	   	
+
+	   	List<Entry<String, Integer>> tokenPairList = new ArrayList<Entry<String, Integer>>(AndOrMapHigh.entrySet());
+		Collections.sort( tokenPairList, new Comparator<Map.Entry<String, Integer>>()
+		{
+			public int compare( Map.Entry<String, Integer> mapEntry1, Map.Entry<String, Integer> mapEntry2 )
+			{
+				return (mapEntry2.getValue()).compareTo( mapEntry1.getValue() );
+			}
+		
+		} );
+		
+		tokenPairList.addAll(AndOrListLow);
+				
+		System.out.println("High Freq Size " + AndOrMapHigh.size());
+		System.out.println("Full Size " + tokenPairList.size());
+		
+		int size = tokenPairList.size();
+		
+		Scanner in = new Scanner(System.in);
+		String input = "n";
+		
+		int current = 0;
+		int limit = 0;
+		int page = 1;
+		
+		while(input.matches("n")){
+		
+			System.out.println("\n-----------------------------------------------------------\n" + search + " [ Page " + page + " ]\n\n" );
+			
+				if(current + 20 > size)
+					limit = size;
+				else
+					limit = current + 20;
+			
+				
+		for(int i = current; i< limit; i++, current++){
+			Map.Entry<String, Integer> mapEntry = tokenPairList.get(i);
+//			System.out.println(mapEntry.getValue());
+			 BasicDBObject queryUrl = new BasicDBObject();
+			 queryUrl.put("docID", mapEntry.getKey());
+			 DBCursor cursorUrl = coll1.find(queryUrl);
+           
+			 if (cursorUrl.hasNext()) { 
+				 
+				DBObject objUrl = (DBObject) cursorUrl.next();
+                      
+           		System.out.println(mapEntry.getValue() +" "+ objUrl.get("url"));
+          		
+           }
+		}
+		
+		if(current>=size)
+			break;
+		
+		System.out.println("\n\n'n' for page " + ++page);
+		input = in.nextLine();
+		
+
+		}
+		
+		System.out.println("\n\n");
+		
+//	   Iterator mapIter = AndOrMap.keySet().iterator();
+//	   while(mapIter.hasNext()){
+//		   System.out.println(AndOrMap.get(mapIter.next()));		   
+//	   } 
+//	   
+//       BasicDBObject query = new BasicDBObject();
+//       query.put("word", search);
+//       
+//       DBCursor cursor = coll.find(query);
+//       if (cursor.hasNext()) { 
+//     	  
+//           DBObject obj = (DBObject) cursor.next();
+//                     
+//           List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
+//
+//           for(BasicDBObject tempObj: temp){
+//           	
+//               BasicDBObject queryUrl = new BasicDBObject();
+//               queryUrl.put("docID", tempObj.get("id"));
+//               DBCursor cursorUrl = coll1.find(queryUrl);
+//               
+//               if (cursorUrl.hasNext()) { 
+//             	  
+//                   DBObject objUrl = (DBObject) cursorUrl.next();
+//                             
+//               	System.out.println("[" +tempObj.get("frequency")+"] " + objUrl.get("url"));
+//               }
+//               
+//           	
+//           }
+//    	 
+//       }
+//       else{
+//       	System.out.println("Sorry! Word not found");
+//
+//       }
+       
+  }
+   
    
    
    public void fnWriteDocMap(Map<String, String> docMap) throws UnknownHostException{

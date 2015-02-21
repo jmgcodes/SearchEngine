@@ -105,12 +105,11 @@ public class SearchEngineMain{
 //		Mdb.fnCalculateTFIDF();
 		
 		while(true){
-			
 			System.out.println("Enter the string to search");
 			
 			String search = in.nextLine();
 			
-			Mdb.fnFind(search.toLowerCase());
+			Mdb.fnSearch(search.toLowerCase());
 			
 			
 		
