@@ -227,28 +227,12 @@ public class TextProcessingWebFiles{
 							
 							temppos.incFreq();
 							temppos.add(wrdPos);
-							//temppos.position.add(wrdPos);
 
 							if(flag)
 								tempdocList.add(temppos);
 							
 							wordMap.put(word, tempdocList);
 							
-							//System.out.println(word + "---" +temppos.getPos());
-							/*
-							String tokenTemp = "";
-							if(Previous == ""){
-								Previous = word;
-								continue;
-							}
-							else{
-								tokenTemp = Previous + " " + word;
-								Previous = word;
-							}
-							
-							Integer count1 = twoGramList.get(tokenTemp);
-							count1 = (count1 == null) ? 1 : ++count1;
-							twoGramList.put(tokenTemp, count1);*/
 
 						}
 					}
@@ -282,7 +266,7 @@ public class TextProcessingWebFiles{
 			}
 	 }
 	 
-	 
+	 /*
 	 public static void printMaxWeblink() throws IOException{
 		 File fileWeblink = new File("./Files/Result/maxWeblink.txt");
 	     	
@@ -350,7 +334,7 @@ public class TextProcessingWebFiles{
 			}
 
 	 }
-	 /*
+	 
 	 public static void printTopTwoGrams() throws IOException{
 		 
 	     	File fileDomainMap = new File("./Files/Result/TwoGrams.txt");

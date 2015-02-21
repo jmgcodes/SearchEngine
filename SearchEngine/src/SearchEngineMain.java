@@ -94,15 +94,15 @@ public class SearchEngineMain{
 		 */
          // Text processing
          
-   TextProcessingWebFiles.textProcessing("./Files/Result/IndexMap.txt");
+//   TextProcessingWebFiles.textProcessing("./Files/Result/IndexMap.txt");
          
-        System.out.println("End");
+//        System.out.println("End");
 		
 		
 		/***************** PART 3: Indexing ******************************/
 		MongoDB Mdb = new MongoDB();
 		
-		Mdb.fnCalculateTFIDF();
+//		Mdb.fnCalculateTFIDF();
 		
 		while(true){
 			
@@ -110,7 +110,7 @@ public class SearchEngineMain{
 			
 			String search = in.nextLine();
 			
-			Mdb.fnFind(search);
+			Mdb.fnFind(search.toLowerCase());
 			
 			
 		
