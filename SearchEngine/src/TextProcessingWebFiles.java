@@ -8,13 +8,20 @@
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 class posObj{
 	 private String docID = "";
@@ -148,6 +155,77 @@ public class TextProcessingWebFiles{
 		
 
 	}
+	 
+	 public static void fnUpdateTitle(String filePath) throws FileNotFoundException, UnknownHostException{
+		 
+			FileReader inputFile = new FileReader(filePath);
+			
+			BufferedReader bufferread = new BufferedReader(inputFile);
+			
+			String eachline;
+						
+			try
+			{
+				while((eachline = bufferread.readLine() ) != null){
+				eachline = eachline.trim();
+				if(!( eachline.isEmpty())){
+					String[] attr = eachline.split(" ");
+					int fileIndex = attr.length - 1;
+					String textFileName = attr[fileIndex];
+					String webLink  = attr[0];
+					if(!textFileName.equals("NA")){
+						fnParseHTML(textFileName, webLink);
+					}
+				}
+			  }
+			}
+
+			catch(IOException e)
+			{
+			     System.out.println(e);	
+			}
+			
+			finally
+			{
+				try {
+					
+					if(bufferread != null)
+						bufferread.close();
+					
+				}
+				catch(IOException e){
+					System.out.println(e);
+				}
+			}
+	 
+
+	 }
+	 
+	 public static void fnParseHTML(String fileName, String webLink) throws IOException{
+		 
+		 
+			File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP_HTML/" + fileName + ".html");
+
+			if (!fileText.exists()) {
+				return;
+			}
+         		
+			FileInputStream fis = new FileInputStream(fileText);
+			byte[] data = new byte[(int) fileText.length()];
+			fis.read(data);
+			fis.close();
+
+			String HTMLSTring = new String(data, "UTF-8");
+
+			Document html = Jsoup.parse(HTMLSTring);
+	        String title = html.title();
+	        String h1 = html.body().getElementsByTag("h1").text();
+	 
+	        System.out.println("Input HTML String to JSoup :" + HTMLSTring);
+	        System.out.println("After parsing, Title : " + title);
+	        System.out.println("Afte parsing, Heading : " + h1);
+		 
+	 }
 	 
 	 public static void fnCountWords(String fileName, String webLink) throws FileNotFoundException{
 		 

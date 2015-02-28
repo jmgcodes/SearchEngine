@@ -18,6 +18,21 @@ import java.math.*;
 
 public class MongoDB{
 	
+	private class RankObject{
+		
+		int qrWC;
+		double tfidf_score;
+		Set<Integer> posSet;
+		
+		RankObject(){
+			this.qrWC = 0;
+			this.tfidf_score = 0.0;
+			this.posSet = new TreeSet<Integer>();
+		}
+		
+	}
+	
+	
 	static MongoClient mongoClient;
 	static DB db;
 	static DBCollection coll;
@@ -44,7 +59,7 @@ public class MongoDB{
           while(iterMap.hasNext()){
         	  
         	  if(count%1000==0)
-        		  System.out.println("Storing word " + count + " to " + count+1000);
+        		  System.out.println("Storing word " + count + " to " + (count+1000));
         		  
         	  count++;
 
@@ -132,11 +147,14 @@ public class MongoDB{
    public void fnSearch(String search) throws UnknownHostException{
 	   	   
 	   String[] searchArr = search.split(" ");
+	   int querySize = searchArr.length;
 	   
-	   Map<String,Integer> AndOrMap = new HashMap<String, Integer>();
+	   int queryWordPros = 0;
+	   Map<String,RankObject> AndOrMap = new HashMap<String, RankObject>();
 	   
 	   for(String word: searchArr){
 		   
+		   queryWordPros++;
 		   BasicDBObject query = new BasicDBObject();
 	       query.put("word", word);
 	       DBCursor cursor = coll.find(query);
@@ -146,12 +164,55 @@ public class MongoDB{
 	           List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
 	           
 	           for(BasicDBObject tempObj: temp){
-	        	   int count = 0;
+	        	   int countrobj = 1;
+	        	   
 	        	   String docid = tempObj.get("id").toString();
+	        	   double tfidfrobj = (double)tempObj.get("tfidf");
+	        	   
+	        	   RankObject robj;
 	        	   if(AndOrMap.containsKey(docid)){
-	        		   count = AndOrMap.get(docid);
+	        		   robj = AndOrMap.get(docid);
+	        		   countrobj = robj.qrWC;
+	        		   robj.qrWC = countrobj+1;
+	        		   
+	        		   robj.tfidf_score += tfidfrobj;
+	        		   
 	        	   }
-	        	   AndOrMap.put(docid, count+1);
+	        	   else{
+	        		   robj = new RankObject();
+	        		   robj.qrWC = countrobj;
+	        		   robj.tfidf_score = tfidfrobj;
+	        		   
+	        	   }
+        		   robj.posSet.addAll((List<Integer>)tempObj.get("pos"));
+        		   
+        		   if(queryWordPros == querySize){
+        			   
+        			   if(robj.qrWC == querySize){
+        				   
+        				   //Check
+        					Iterator treIterator = robj.posSet.iterator();
+        					int prev = 0;
+        					boolean flag = false;
+        					while(treIterator.hasNext()){
+        						int curr = (int)treIterator.next();
+        						if(prev>0){
+        							if(prev == curr-1){
+        								flag = true;
+        								break;
+        							}
+        						}
+    							prev = curr;
+        					}
+        					if(!flag)
+             				   robj.posSet.clear();
+        			   }
+        			   else
+        				   robj.posSet.clear();
+        			   
+        		   }
+        		   
+	        	   AndOrMap.put(docid, robj);
 	           }
 	       } 
 	   }
@@ -163,39 +224,55 @@ public class MongoDB{
 		   
 	   }
 		   
-	   
-	   Map<String,Integer> AndOrMapHigh = new HashMap<String, Integer>();
-	   
-	   	List<Entry<String, Integer>> AndOrList = new ArrayList<Entry<String, Integer>>(AndOrMap.entrySet());
-	   	List<Entry<String, Integer>> AndOrListLow = new ArrayList<Entry<String, Integer>>();
+   
+	   Map<String,RankObject> AndOrMapTopOcc = new HashMap<String, RankObject>();
+	   Map<String,RankObject> AndOrMapTop = new HashMap<String, RankObject>();
+	   Map<String,RankObject> AndOrMapHigh = new HashMap<String, RankObject>();
+	   Map<String,RankObject> AndOrMapLow = new HashMap<String, RankObject>();
+ 
+	   	List<Entry<String, RankObject>> AndOrList = new ArrayList<Entry<String, RankObject>>(AndOrMap.entrySet());
+	   //	List<Entry<String, RankObject>> AndOrListLow = new ArrayList<Entry<String, RankObject>>();
 
-		for(Map.Entry<String, Integer> mapEntry:AndOrList){
+		for(Map.Entry<String, RankObject> mapEntry:AndOrList){
 
-			if(mapEntry.getValue() > 1){
-				
+			if(mapEntry.getValue().qrWC == querySize && mapEntry.getValue().posSet.size()>0){
+				AndOrMapTopOcc.put(mapEntry.getKey(), mapEntry.getValue());
+			}
+			else if(mapEntry.getValue().qrWC == querySize){
+				AndOrMapTop.put(mapEntry.getKey(), mapEntry.getValue());
+			}
+			else if(mapEntry.getValue().qrWC > ((querySize>3)?(querySize-2):1)){
 				AndOrMapHigh.put(mapEntry.getKey(), mapEntry.getValue());
 			}
 			else{
-				AndOrListLow.add(mapEntry);
+				AndOrMapLow.put(mapEntry.getKey(), mapEntry.getValue());
 			}
 	
 		}
 	   	
+		   	List<Entry<String, RankObject>> tokenPairTOList = new ArrayList<Entry<String, RankObject>>();
+			   //	tokenPairTList = fnPositionSort(AndOrMapTop,searchArr);
+			   	tokenPairTOList = fnSort(AndOrMapTopOcc);
 
-	   	List<Entry<String, Integer>> tokenPairList = new ArrayList<Entry<String, Integer>>(AndOrMapHigh.entrySet());
-		Collections.sort( tokenPairList, new Comparator<Map.Entry<String, Integer>>()
-		{
-			public int compare( Map.Entry<String, Integer> mapEntry1, Map.Entry<String, Integer> mapEntry2 )
-			{
-				return (mapEntry2.getValue()).compareTo( mapEntry1.getValue() );
-			}
+	   	List<Entry<String, RankObject>> tokenPairTList = new ArrayList<Entry<String, RankObject>>();
+	   //	tokenPairTList = fnPositionSort(AndOrMapTop,searchArr);
+	   	tokenPairTList = fnSort(AndOrMapTop);
+
+
+	   	List<Entry<String, RankObject>> tokenPairHList = new ArrayList<Entry<String, RankObject>>();
+	   	tokenPairHList = fnSort(AndOrMapHigh);
+	   	
+
+		List<Entry<String, RankObject>> tokenPairLList = new ArrayList<Entry<String, RankObject>>();
+		tokenPairLList = fnSort(AndOrMapLow);
 		
-		} );
-		
-		tokenPairList.addAll(AndOrListLow);
-				
-		System.out.println("High Freq Size " + AndOrMapHigh.size());
-		System.out.println("Full Size " + tokenPairList.size());
+	   	
+	   	List<Entry<String, RankObject>> tokenPairList = new ArrayList<Entry<String, RankObject>>();
+	   	tokenPairList.addAll(tokenPairTOList);
+	   	tokenPairList.addAll(tokenPairTList);
+	   	tokenPairList.addAll(tokenPairHList);
+	   	tokenPairList.addAll(tokenPairLList);
+
 		
 		int size = tokenPairList.size();
 		
@@ -217,7 +294,7 @@ public class MongoDB{
 			
 				
 		for(int i = current; i< limit; i++, current++){
-			Map.Entry<String, Integer> mapEntry = tokenPairList.get(i);
+			Map.Entry<String, RankObject> mapEntry = tokenPairList.get(i);
 //			System.out.println(mapEntry.getValue());
 			 BasicDBObject queryUrl = new BasicDBObject();
 			 queryUrl.put("docID", mapEntry.getKey());
@@ -227,7 +304,7 @@ public class MongoDB{
 				 
 				DBObject objUrl = (DBObject) cursorUrl.next();
                       
-           		System.out.println(mapEntry.getValue() +" "+ objUrl.get("url"));
+           		System.out.println(mapEntry.getValue().qrWC + " " + mapEntry.getValue().tfidf_score +" "+ objUrl.get("url"));
           		
            }
 		}
@@ -242,48 +319,142 @@ public class MongoDB{
 		}
 		
 		System.out.println("\n\n");
-		
-//	   Iterator mapIter = AndOrMap.keySet().iterator();
-//	   while(mapIter.hasNext()){
-//		   System.out.println(AndOrMap.get(mapIter.next()));		   
-//	   } 
-//	   
-//       BasicDBObject query = new BasicDBObject();
-//       query.put("word", search);
-//       
-//       DBCursor cursor = coll.find(query);
-//       if (cursor.hasNext()) { 
-//     	  
-//           DBObject obj = (DBObject) cursor.next();
-//                     
-//           List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
-//
-//           for(BasicDBObject tempObj: temp){
-//           	
-//               BasicDBObject queryUrl = new BasicDBObject();
-//               queryUrl.put("docID", tempObj.get("id"));
-//               DBCursor cursorUrl = coll1.find(queryUrl);
-//               
-//               if (cursorUrl.hasNext()) { 
-//             	  
-//                   DBObject objUrl = (DBObject) cursorUrl.next();
-//                             
-//               	System.out.println("[" +tempObj.get("frequency")+"] " + objUrl.get("url"));
-//               }
-//               
-//           	
-//           }
-//    	 
-//       }
-//       else{
-//       	System.out.println("Sorry! Word not found");
-//
-//       }
-       
+		       
   }
    
+   public List<Entry<String, RankObject>> fnSort(Map<String,RankObject> mapToSort){
+	   
+		List<Entry<String, RankObject>> tokenPairList = new ArrayList<Entry<String, RankObject>>(mapToSort.entrySet());
+		Collections.sort( tokenPairList, new Comparator<Map.Entry<String, RankObject>>()
+		{
+			public int compare( Map.Entry<String, RankObject> mapEntry1, Map.Entry<String, RankObject> mapEntry2 )
+			{
+			    Double value2 = Double.valueOf(mapEntry2.getValue().tfidf_score);    
+			    Double value1 = Double.valueOf(mapEntry1.getValue().tfidf_score);
+			    
+				return (value2).compareTo( value1 );
+			}
+		
+		} );
+
+		return tokenPairList;
+	   
+   }
    
    
+   public List<Entry<String, RankObject>> fnPositionSort(Map<String,RankObject> mapToSort, String[] searchArr){
+
+		List<Entry<String, RankObject>> tokenPairList = new ArrayList<Entry<String, RankObject>>(mapToSort.entrySet());
+		List<Entry<String, RankObject>> tokenPairHList = new ArrayList<Entry<String, RankObject>>();
+		List<Entry<String, RankObject>> tokenPairLList = new ArrayList<Entry<String, RankObject>>();
+
+		String docID = "";
+		
+		System.out.println(tokenPairList.size());
+		int count = 0;
+		
+		for(Entry<String, RankObject> entry: tokenPairList){
+			
+			docID = entry.getKey();
+			List<Integer> prevPosList = new ArrayList<Integer>();
+			List<Integer> currPosList = new ArrayList<Integer>();
+			boolean flag = false;
+			
+		   for(String word: searchArr){
+			   
+			   
+			   
+			   System.out.println(docID + "," + word);
+			   
+			   BasicDBObject query = new BasicDBObject();
+		       query.put("word", word);
+		       DBCursor cursor = coll.find(query);
+		       
+		       if (cursor.hasNext()) {   
+		           DBObject obj = (DBObject) cursor.next();	                     
+		           List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
+		           
+		           for(BasicDBObject docobj:temp){
+		        	   
+		        	   if(docobj.get("id").equals(docID)){
+		        		   
+		        		   currPosList = (List<Integer>)docobj.get("pos");
+		        		   
+		        		   if(!prevPosList.isEmpty()){
+		        			   
+		        			   for(int doc:currPosList){
+		        				   
+		        				   if(prevPosList.contains(doc-1)){
+		        					   flag = true;
+		        					   break;
+		        				   }
+		        				   else{
+		        					   flag=false;
+		        				   }
+		        				   
+		        			   }
+		        			   
+		        			   
+		        		   }
+		        		   else{
+		        			   flag = true;
+		        		   }
+	        			   prevPosList.clear();
+	        			   prevPosList.addAll(currPosList);
+	        			   break;
+		        	   }
+		        	   
+		           }
+		       }
+		       
+		       if(!flag)
+		    	   break;
+		       
+		   }
+		   
+		   if(flag){
+				System.out.println("if " + entry.getKey());
+
+			   tokenPairHList.add(entry);
+		   }
+		   else{
+				System.out.println("else " + entry.getKey());
+
+			   tokenPairLList.add(entry);
+		   }
+		}
+		
+		Collections.sort( tokenPairHList, new Comparator<Map.Entry<String, RankObject>>()
+		{
+			public int compare( Map.Entry<String, RankObject> mapEntry1, Map.Entry<String, RankObject> mapEntry2 )
+			{
+			    Double value2 = Double.valueOf(mapEntry2.getValue().tfidf_score);    
+			    Double value1 = Double.valueOf(mapEntry1.getValue().tfidf_score);
+			    
+				return (value2).compareTo( value1 );
+			}
+		
+		} );
+
+		Collections.sort( tokenPairLList, new Comparator<Map.Entry<String, RankObject>>()
+		{
+			public int compare( Map.Entry<String, RankObject> mapEntry1, Map.Entry<String, RankObject> mapEntry2 )
+			{
+			    Double value2 = Double.valueOf(mapEntry2.getValue().tfidf_score);    
+			    Double value1 = Double.valueOf(mapEntry1.getValue().tfidf_score);
+			    
+				return (value2).compareTo( value1 );
+			}
+		
+		} );
+
+		tokenPairList.clear();
+		tokenPairList.addAll(tokenPairHList);
+		tokenPairList.addAll(tokenPairLList);
+		
+		return tokenPairList;
+	   
+   }
    public void fnWriteDocMap(Map<String, String> docMap) throws UnknownHostException{
 	   
 	    Iterator itr = docMap.keySet().iterator();
@@ -322,7 +493,7 @@ public class MongoDB{
             	
             	int tf = (int)tempInstObj.get("frequency");
             	
-                double tfidf = (Math.log(1+tf))*(Math.log((float)N/NT));
+                double tfidf = (1+Math.log10(tf))*(Math.log10((float)N/NT));
 
                 tempInstObj.put("tfidf", tfidf);
                 tempnew.add(tempInstObj);

@@ -98,11 +98,11 @@ public class SearchEngineMain{
          
 //        System.out.println("End");
 		
-		
+		//TextProcessingWebFiles.fnUpdateTitle("./Files/Result/IndexMap.txt");
 		/***************** PART 3: Indexing ******************************/
 		MongoDB Mdb = new MongoDB();
 		
-//		Mdb.fnCalculateTFIDF();
+		//Mdb.fnCalculateTFIDF();
 		
 		while(true){
 			System.out.println("Enter the string to search");
