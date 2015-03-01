@@ -29,11 +29,19 @@ public class MongoDB{
 		int qrWC;
 		double tfidf_score;
 		Set<Integer> posSet;
+		double cos_score;
+		double mag_doc;
+		
+		double page_rank;
 		
 		RankObject(){
 			this.qrWC = 0;
 			this.tfidf_score = 0.0;
 			this.posSet = new TreeSet<Integer>();
+			this.cos_score = 0.0;
+			this.mag_doc = 0.0;
+			
+			this.page_rank = 0.0;
 		}
 		
 	}
@@ -162,9 +170,30 @@ public class MongoDB{
    
    public void fnSearch(String search) throws UnknownHostException{
 	   	   
+       int N = 85000;
+	   
+	   System.out.println("1" + new Date());
+
+       
 	   String[] searchArr = search.split(" ");
 	   int querySize = searchArr.length;
+	   double mag_query = 0.0;
 	   
+	   Map<String, Double> queryMap = new HashMap<String, Double>();
+	   for(String word: searchArr){
+		   
+		   double queryWC = 0.0;
+		   if(queryMap.containsKey(word)){
+			   
+			   queryWC = queryMap.get(word);
+		   }
+		   queryWC += 1.0;
+		   queryMap.put(word, queryWC);
+		   
+	   }
+	   
+	   System.out.println("2" + new Date());
+
 	   int queryWordPros = 0;
 	   Map<String,RankObject> AndOrTempMap = new HashMap<String, RankObject>();
 	   Map<String,RankObject> AndOrMap = new HashMap<String, RankObject>();
@@ -181,6 +210,13 @@ public class MongoDB{
 	       if (cursor.hasNext()) {   
 	           DBObject obj = (DBObject) cursor.next();	                     
 	           List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
+	           
+	           double queryTF = queryMap.get(word);
+	           queryTF = (1+Math.log10(queryTF))*Math.log10((double)N/temp.size());
+	           queryMap.put(word, queryTF);
+	           
+	           mag_query = Math.sqrt((Math.pow(mag_query, 2)+Math.pow(queryTF, 2)));
+	           
 	           List<Integer> tempTitle = (List<Integer>) obj.get("title");
 	           Set<Integer> tempTitleSet = new HashSet();
 	           tempTitleSet.addAll(tempTitle);
@@ -207,8 +243,6 @@ public class MongoDB{
 	        	   
 	        	   AndOrTitleMap.put(strDocIDTitle,objTitle);
 	        	  
-	        	   if(strDocIDTitle.equals("20755"))
-	        		   System.out.println(word + "," + AndOrTitleMap.get(strDocIDTitle).qrWC);
 	        	   
 
 	           }
@@ -234,7 +268,12 @@ public class MongoDB{
 	        		   robj.qrWC = countrobj;
 	        		   robj.tfidf_score = tfidfrobj;
 	        		   
+	        		   
 	        	   }
+	        	   
+	        	   robj.cos_score += (tfidfrobj*queryTF);
+	        	   robj.mag_doc = Math.sqrt((Math.pow(robj.mag_doc, 2)+Math.pow(tfidfrobj, 2)));
+	        	   
         		   robj.posSet.addAll((List<Integer>)tempObj.get("pos"));
         		   
         		   if(queryWordPros == querySize){
@@ -268,7 +307,11 @@ public class MongoDB{
 	           }
 	       } 
 	   }
+	   
+	   System.out.println("3" + new Date());
 
+	   queryMap.clear();
+	   /*
        Iterator itrTitle = AndOrTitleMap.keySet().iterator();
        while(itrTitle.hasNext()){
     	   
@@ -281,16 +324,26 @@ public class MongoDB{
     	   }
     	   
        }
-
-       AndOrTitleMap.clear();
-
+	*/
+       //AndOrTitleMap.clear();
+       AndOrTitleFinalMap.clear();
+       
        Iterator itrMap = AndOrTempMap.keySet().iterator();
        while(itrMap.hasNext()){
     	   
     	   String keyTemp = (String)itrMap.next();
-    	   if(!AndOrTitleFinalMap.containsKey(keyTemp)){
+    	   RankObject robjTemp = AndOrTempMap.get(keyTemp);
+    	   double cos = robjTemp.cos_score/(robjTemp.mag_doc*mag_query);
+    	   
+    	   if(AndOrTitleMap.containsKey(keyTemp))
+    		   robjTemp.page_rank = 10*(cos)+10*AndOrTitleMap.get(keyTemp).qrWC + robjTemp.tfidf_score;
+    	   else
+    		   robjTemp.page_rank = 10*(cos) + robjTemp.tfidf_score;
+
+    	   AndOrTempMap.put(keyTemp, robjTemp);
+    	   //if(!AndOrTitleFinalMap.containsKey(keyTemp)){
     		   AndOrMap.put(keyTemp, AndOrTempMap.get(keyTemp));
-    	   }
+    	   //}
     	   
        }
 
@@ -317,7 +370,7 @@ public class MongoDB{
 			
 			} );
 
-		   	tokenPairList.addAll(tokenPairTitleList);
+		   	//tokenPairList.addAll(tokenPairTitleList);
 
 	   	}
 
@@ -334,7 +387,13 @@ public class MongoDB{
 
 		for(Map.Entry<String, RankObject> mapEntry:AndOrList){
 
-			if(mapEntry.getValue().qrWC == querySize && mapEntry.getValue().posSet.size()>0){
+			boolean flag_title = false;
+			if(AndOrTitleMap.containsKey(mapEntry.getKey())){
+				//if(AndOrTitleMap.get(mapEntry.getKey()).qrWC > querySize/2)
+					flag_title = true;
+			}
+			
+			if((mapEntry.getValue().qrWC == querySize && mapEntry.getValue().posSet.size()>0) || flag_title){
 				AndOrMapTopOcc.put(mapEntry.getKey(), mapEntry.getValue());
 			}
 			else if(mapEntry.getValue().qrWC == querySize){
@@ -403,7 +462,13 @@ public class MongoDB{
 				 
 				DBObject objUrl = (DBObject) cursorUrl.next();
                       
-           		System.out.println(mapEntry.getValue().qrWC + " " + mapEntry.getValue().tfidf_score +" "+ objUrl.get("url"));
+				if(AndOrTitleMap.containsKey(mapEntry.getKey())){
+	           		System.out.println(mapEntry.getValue().qrWC + " " + AndOrTitleMap.get(mapEntry.getKey()).qrWC + " " + mapEntry.getValue().page_rank +" "+ + mapEntry.getValue().cos_score/(mapEntry.getValue().mag_doc*mag_query) +" "+ + mapEntry.getValue().tfidf_score +" "+ objUrl.get("url"));		
+				}
+				else
+	           		System.out.println(mapEntry.getValue().qrWC + " " + "NA" + " " + mapEntry.getValue().page_rank +" "+ + mapEntry.getValue().cos_score/(mapEntry.getValue().mag_doc*mag_query) +" "+ + mapEntry.getValue().tfidf_score +" "+ objUrl.get("url"));		
+
+				
           		
            }
 		}
@@ -428,8 +493,8 @@ public class MongoDB{
 		{
 			public int compare( Map.Entry<String, RankObject> mapEntry1, Map.Entry<String, RankObject> mapEntry2 )
 			{
-			    Double value2 = Double.valueOf(mapEntry2.getValue().tfidf_score);    
-			    Double value1 = Double.valueOf(mapEntry1.getValue().tfidf_score);
+			    Double value2 = Double.valueOf(mapEntry2.getValue().page_rank);    
+			    Double value1 = Double.valueOf(mapEntry1.getValue().page_rank);
 			    
 				return (value2).compareTo( value1 );
 			}
