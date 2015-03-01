@@ -37,72 +37,73 @@ public class SearchEngineMain{
 		//txtProcObj.fnBeginTextProcessing();
 		
 		/***************** PART 2: Web Crawler ******************************/
-		/*
-		System.out.println("\nWeb Crawling\n-----------------------------------------------------------------\n");
-
-		 String crawlStorageFolder = "./Files/Dump"; 
+		
+//		System.out.println("\nWeb Crawling\n-----------------------------------------------------------------\n");
+//
+//		 String crawlStorageFolder = "./Files/Dump"; 
+//		 
+//         int numberOfCrawlers = 10;
+//
+//         CrawlConfig config = new CrawlConfig();
+//         config.setCrawlStorageFolder(crawlStorageFolder);
+//         
+//         config.setUserAgentString("UCI WebCrawler");
+//         
+//         config.setPolitenessDelay(300); 
+//    
+//         config.setMaxDepthOfCrawling(40);
+//
+//         config.setMaxPagesToFetch(100000);
+//
+//         // Instantiate the controller for this crawl.
+//          
+//         PageFetcher pageFetcher = new PageFetcher(config);
+//         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
+//         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
+//         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
+//
+//         
+//         // For each crawl, you need to add some seed urls. These are the first
+//         // URLs that are fetched and then the crawler starts following links
+//         // which are found in these pages
+//          
+//         controller.addSeed("http://www.ics.uci.edu/~lopes/index.html");
+//                  
+//         
+//         // Start the crawl. This is a blocking operation, meaning that your code
+//         // will reach the line after this only when crawling is finished.
+//          
+//         
+//         Date dt1 = new Date();
+//         controller.start(MyCrawler.class, numberOfCrawlers); 
+//         Date dt2 = new Date();
+//         
+//			long diff = dt2.getTime() - dt1.getTime();
+//			long diffSeconds = diff / 1000 % 60;
+//			long diffMinutes = diff / (60 * 1000) % 60;
+//			long diffHours = diff / (60 * 60 * 1000) % 24;
+//
+//         System.out.println("Time: " + diffHours + " hr " + diffMinutes + " m " + diffSeconds + " s");
+//
+//         MyCrawler.writeIndexMap();
+//         MyCrawler.writeDomainMap();
+//         
+//         controller.shutdown();
+//        
+//         System.out.println("Web crawling complete... \nText process begins");
 		 
-         int numberOfCrawlers = 10;
-
-         CrawlConfig config = new CrawlConfig();
-         config.setCrawlStorageFolder(crawlStorageFolder);
-         
-         config.setUserAgentString("UCI WebCrawler 10604535 12647996 82721916");
-         
-         config.setPolitenessDelay(300); 
-    
-         config.setMaxDepthOfCrawling(80);
-
-         config.setMaxPagesToFetch(5);
-
-         // Instantiate the controller for this crawl.
-          
-         PageFetcher pageFetcher = new PageFetcher(config);
-         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
-         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
-
-         
-         // For each crawl, you need to add some seed urls. These are the first
-         // URLs that are fetched and then the crawler starts following links
-         // which are found in these pages
-          
-         controller.addSeed("http://www.ics.uci.edu/~lopes/index.html");
-                  
-         
-         // Start the crawl. This is a blocking operation, meaning that your code
-         // will reach the line after this only when crawling is finished.
-          
-         
-         Date dt1 = new Date();
-         controller.start(MyCrawler.class, numberOfCrawlers); 
-         Date dt2 = new Date();
-         
-			long diff = dt2.getTime() - dt1.getTime();
-			long diffSeconds = diff / 1000 % 60;
-			long diffMinutes = diff / (60 * 1000) % 60;
-			long diffHours = diff / (60 * 60 * 1000) % 24;
-
-         System.out.println("Time: " + diffHours + " hr " + diffMinutes + " m " + diffSeconds + " s");
-
-         MyCrawler.writeIndexMap();
-         MyCrawler.writeDomainMap();
-         
-         controller.shutdown();
-        
-         System.out.println("Web crawling complete... \nText process begins");
-		 */
          // Text processing
          
 //   TextProcessingWebFiles.textProcessing("./Files/Result/IndexMap.txt");
-         
+//         
 //        System.out.println("End");
-		
-		//TextProcessingWebFiles.fnUpdateTitle("./Files/Result/IndexMap.txt");
-		/***************** PART 3: Indexing ******************************/
+//		
+//		//TextProcessingWebFiles.fnUpdateTitle("./Files/Result/IndexMap.txt");
+//		/***************** PART 3: Indexing ******************************/
 		MongoDB Mdb = new MongoDB();
 		
-		//Mdb.fnCalculateTFIDF();
+//		Mdb.fnCalculateTFIDF();
+		Mdb.fnUpdateDocID("./Files/Result/IndexMap.txt");
 		
 		while(true){
 			System.out.println("Enter the string to search");

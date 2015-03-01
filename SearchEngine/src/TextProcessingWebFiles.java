@@ -54,6 +54,14 @@ class posObj{
 	 }
 }
 
+
+class docObject{
+	
+	String URL = "";
+	String title = "";
+	
+}
+
  
 
 
@@ -63,9 +71,10 @@ public class TextProcessingWebFiles{
      private static int maxCnt = 0;	
 	 private static String maxLink = "";
 	 private static int docId = 0;
-	 private static Map<String, String>  webLinkID = new HashMap<String,String>();
+	 private static Map<String, docObject>  webLinkID = new HashMap<String,docObject>();
 	 private static Map<String,  List<posObj> >  wordMap = new HashMap<String, List<posObj> >();
-	 
+	 private static Map<String,  List<Integer> >  wordTitleMap = new HashMap<String, List<Integer> >();
+
 	 // private static Map<String, ListdocObj>  wordList = new HashMap<String,Integer>();
 	  private static Map<String, Integer>  wordList = new HashMap<String,Integer>();
      //  private static Map<String, Integer>  twoGramList = new HashMap<String,Integer>();
@@ -114,16 +123,18 @@ public class TextProcessingWebFiles{
 					System.out.printf("Processing docs %d and %d ... \n", docId, docId+100);
 				}
 				
-				if(docId%10000 == 0){	
-					Mdb.fnMongo(wordMap);
+				if(docId%100000 == 0){	
+					Mdb.fnMongo(wordMap,wordTitleMap);
 					wordMap.clear();
+					wordTitleMap.clear();
 					Mdb.fnWriteDocMap(webLinkID);
 					webLinkID.clear();
 				}
 			}
 		  }
-			Mdb.fnMongo(wordMap);
+			Mdb.fnMongo(wordMap,wordTitleMap);
 			wordMap.clear();
+			wordTitleMap.clear();
 			
 			Mdb.fnWriteDocMap(webLinkID);
 			webLinkID.clear();
@@ -201,13 +212,13 @@ public class TextProcessingWebFiles{
 
 	 }
 	 
-	 public static void fnParseHTML(String fileName, String webLink) throws IOException{
+	 public static String fnParseHTML(String fileName, String webLink) throws IOException{
 		 
 		 
-			File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP_HTML/" + fileName + ".html");
+			File fileText = new File("/home/vijaykumar/IR_DUMP_HTML/" + fileName + ".html");
 
 			if (!fileText.exists()) {
-				return;
+				return "";
 			}
          		
 			FileInputStream fis = new FileInputStream(fileText);
@@ -219,24 +230,48 @@ public class TextProcessingWebFiles{
 
 			Document html = Jsoup.parse(HTMLSTring);
 	        String title = html.title();
-	        String h1 = html.body().getElementsByTag("h1").text();
 	 
-	        System.out.println("Input HTML String to JSoup :" + HTMLSTring);
-	        System.out.println("After parsing, Title : " + title);
-	        System.out.println("Afte parsing, Heading : " + h1);
+	        //System.out.println("After parsing, Title : " + title);
+	        
+			String[] attr = title.toLowerCase().split("[^a-zA-Z0-9]+");
+			
+			String Previous = "";
+			for(String word: attr){		
+				
+				if(stopWords.contains(word) || word.length() < 2)
+					continue;
+				
+				else{
+					
+					List<Integer> docList = new ArrayList<Integer>();
+					if(wordTitleMap.containsKey(word)){
+						
+						docList = wordTitleMap.get(word);
+						
+					}
+					
+					docList.add(docId);
+					
+					wordTitleMap.put(word, docList);
+					
+				}
+			}
+			
+			return title;
+
 		 
 	 }
 	 
-	 public static void fnCountWords(String fileName, String webLink) throws FileNotFoundException{
+	 public static void fnCountWords(String fileName, String webLink) throws IOException{
 		 
-//			FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName );
+			FileReader inputFile = new FileReader("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
 //			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
-			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
+//			FileReader inputFile = new FileReader("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName );
 			//FileReader inputFile = new FileReader("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
-//      	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName);
+      	  File fileText = new File("/home/vijaykumar/IR_DUMP/" + fileName + ".txt");
       	  //File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName + ".txt");
-	      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
+//	      	  File fileText = new File("/home/jgirisha/Documents/GitHub/IR_DUMP/" + fileName);
 	      	  //File fileText = new File("/home/rajanisr/IR_DUMP/" + fileName + ".txt");
 
 			if (!fileText.exists()) {
@@ -244,8 +279,15 @@ public class TextProcessingWebFiles{
 			}
             
 			docId++;
+			
+			String strTitle = fnParseHTML(fileName, webLink);
+
+			
 			String strDocID = "" + docId;
-			webLinkID.put(strDocID, webLink);
+			docObject docOBJ = new docObject();
+			docOBJ.URL = webLink;
+			docOBJ.title = strTitle;
+			webLinkID.put(strDocID, docOBJ);
 
 			
 			BufferedReader bufferread = new BufferedReader(inputFile);

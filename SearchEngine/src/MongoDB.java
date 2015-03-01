@@ -11,6 +11,12 @@ import com.mongodb.ServerAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.*;
 
 
@@ -46,12 +52,13 @@ public class MongoDB{
 	    coll1 = db.getCollection("DocMap");
 	}
 	
-   public  void fnMongo(Map<String,  List<posObj>> wordMap){
+   public  void fnMongo(Map<String,  List<posObj>> wordMap, Map<String,List<Integer>>wordTitleMap){
       try{   
     	  
           int count = 0;
           
           List<posObj> docList = new ArrayList<posObj>();
+          List<Integer> docTitleList = new ArrayList<Integer>();
 
           System.out.println("Mapsize: " + wordMap.size());
 
@@ -66,6 +73,11 @@ public class MongoDB{
         	  String word = (String)iterMap.next();
         	  docList = wordMap.get(word);
         	  
+        	  docTitleList.clear();
+        	  if(wordTitleMap.containsKey(word))
+        		  docTitleList = wordTitleMap.get(word);
+        	  
+        	  
               BasicDBObject query = new BasicDBObject();
               query.put("word", word);
               
@@ -75,11 +87,15 @@ public class MongoDB{
                   DBObject obj = (DBObject) cursor.next();
                  
                   List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
-
+                  List<Integer> tempTitle = (List<Integer>)obj.get("title");
                   for(posObj tempposobj: docList){
                    	  temp.add(new BasicDBObject("id",tempposobj.getDocID()).append("pos", tempposobj.getPos()).append("frequency", tempposobj.getFreq()));
                   }
+                  
+                  tempTitle.addAll(docTitleList);
+                  
                  obj.put("doc", temp);
+                 obj.put("title", tempTitle);
                  coll.save(obj); 
                  
               }
@@ -92,7 +108,7 @@ public class MongoDB{
                   }
                   
                   coll.insert(new BasicDBObject("doc",listObj).
-                		  append("word",word));
+                		  append("word",word).append("title", docTitleList));
 
             	  
               }
@@ -455,16 +471,16 @@ public class MongoDB{
 		return tokenPairList;
 	   
    }
-   public void fnWriteDocMap(Map<String, String> docMap) throws UnknownHostException{
+   public void fnWriteDocMap(Map<String, docObject> docMap) throws UnknownHostException{
 	   
 	    Iterator itr = docMap.keySet().iterator();
 	    while(itr.hasNext()){
 	    	
 	    	String id = (String)itr.next();
-	    	String url = docMap.get(id);
+	    	docObject url_title = docMap.get(id);
 	    	
             coll1.insert(new BasicDBObject("docID",id).
-          		  append("url",url));
+          		  append("url",url_title.URL).append("title",url_title.title));
 
 	    }
 	    
@@ -504,5 +520,85 @@ public class MongoDB{
         	
         }
    }
+   
+	 public void fnUpdateDocID(String filePath) throws FileNotFoundException, UnknownHostException{
+		 
+			FileReader inputFile = new FileReader(filePath);
+			BufferedReader bufferread = new BufferedReader(inputFile);
+			
+			String eachline;
+			int count=0; 
+			
+			try
+			{
+				while((eachline = bufferread.readLine() ) != null){
+				eachline = eachline.trim();
+				if(!( eachline.isEmpty())){
+					String[] attr = eachline.split(" ");
+					int fileIndex = attr.length - 1;
+					String textFileName = attr[fileIndex];
+					String webLink  = attr[0];
+					
+					
+					if(!textFileName.equals("NA")){
+						
+						File fileText = new File("/home/vijaykumar/IR_DUMP/" + textFileName + ".txt");
+
+						String strTxt = "";
+						
+						if (fileText.exists()) {
+							
+							FileInputStream fis = new FileInputStream(fileText);
+							byte[] data = new byte[(int) fileText.length()];
+							fis.read(data);
+							fis.close();
+
+							strTxt = new String(data, "UTF-8");
+
+						}
+			         		
+						if(count %100 == 0){
+							System.out.println(count);
+						}
+						count++; 
+						
+						 BasicDBObject queryUrl = new BasicDBObject();
+						 queryUrl.put("url", webLink);
+						 DBCursor cursorUrl = coll1.find(queryUrl);
+			           
+						 if (cursorUrl.hasNext()) { 
+							 
+							DBObject objUrl = (DBObject) cursorUrl.next();
+							objUrl.put("docname", textFileName);
+							objUrl.put("text", strTxt);
+							coll1.save(objUrl);
+							
+						 }
+					}
+				}
+			  }
+			}
+
+			catch(IOException e)
+			{
+			     System.out.println(e);	
+			}
+			
+			finally
+			{
+				try {
+					
+					if(bufferread != null)
+						bufferread.close();
+					
+				}
+				catch(IOException e){
+					System.out.println(e);
+				}
+			}
+	 
+
+	 }
+
    
 }
