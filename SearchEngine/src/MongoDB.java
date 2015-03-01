@@ -166,8 +166,11 @@ public class MongoDB{
 	   int querySize = searchArr.length;
 	   
 	   int queryWordPros = 0;
+	   Map<String,RankObject> AndOrTempMap = new HashMap<String, RankObject>();
 	   Map<String,RankObject> AndOrMap = new HashMap<String, RankObject>();
-	   
+	   Map<String,RankObject> AndOrTitleMap = new HashMap<String, RankObject>();
+	   Map<String,RankObject> AndOrTitleFinalMap = new HashMap<String, RankObject>();
+
 	   for(String word: searchArr){
 		   
 		   queryWordPros++;
@@ -178,16 +181,48 @@ public class MongoDB{
 	       if (cursor.hasNext()) {   
 	           DBObject obj = (DBObject) cursor.next();	                     
 	           List<BasicDBObject> temp = (List<BasicDBObject>) obj.get("doc");
+	           List<Integer> tempTitle = (List<Integer>) obj.get("title");
+	           Set<Integer> tempTitleSet = new HashSet();
+	           tempTitleSet.addAll(tempTitle);
+	           tempTitle.clear();
+	           tempTitle.addAll(tempTitleSet);
+	           
+	           for(int docIDTitle: tempTitle){
+	        	   
+	   				String strDocIDTitle = "" + docIDTitle;
+
+	   				RankObject objTitle;
+	        	   
+	        	   if(AndOrTitleMap.containsKey(strDocIDTitle)){
+	        		   
+	        		   objTitle = AndOrTitleMap.get(strDocIDTitle);
+	        		   objTitle.qrWC++;
+	        		   
+	        	   }
+	        	   else{
+	        		   objTitle = new RankObject();
+	        		   objTitle.qrWC++;
+	        		   
+	        	   }
+	        	   
+	        	   AndOrTitleMap.put(strDocIDTitle,objTitle);
+	        	  
+	        	   if(strDocIDTitle.equals("20755"))
+	        		   System.out.println(word + "," + AndOrTitleMap.get(strDocIDTitle).qrWC);
+	        	   
+
+	           }
+	           
 	           
 	           for(BasicDBObject tempObj: temp){
 	        	   int countrobj = 1;
 	        	   
 	        	   String docid = tempObj.get("id").toString();
 	        	   double tfidfrobj = (double)tempObj.get("tfidf");
-	        	   
+	        	   	        	   
 	        	   RankObject robj;
-	        	   if(AndOrMap.containsKey(docid)){
-	        		   robj = AndOrMap.get(docid);
+	        	   if(AndOrTempMap.containsKey(docid)){
+	        		   robj = AndOrTempMap.get(docid);
 	        		   countrobj = robj.qrWC;
 	        		   robj.qrWC = countrobj+1;
 	        		   
@@ -228,19 +263,67 @@ public class MongoDB{
         			   
         		   }
         		   
-	        	   AndOrMap.put(docid, robj);
+        		   AndOrTempMap.put(docid, robj);
+	        	   	        	   
 	           }
 	       } 
 	   }
+
+       Iterator itrTitle = AndOrTitleMap.keySet().iterator();
+       while(itrTitle.hasNext()){
+    	   
+    	  
+    	   
+    	   String keyTitle = (String)itrTitle.next();
+    	   
+    	   if(AndOrTitleMap.get(keyTitle).qrWC == querySize){
+    		   AndOrTitleFinalMap.put(keyTitle, AndOrTitleMap.get(keyTitle));
+    	   }
+    	   
+       }
+
+       AndOrTitleMap.clear();
+
+       Iterator itrMap = AndOrTempMap.keySet().iterator();
+       while(itrMap.hasNext()){
+    	   
+    	   String keyTemp = (String)itrMap.next();
+    	   if(!AndOrTitleFinalMap.containsKey(keyTemp)){
+    		   AndOrMap.put(keyTemp, AndOrTempMap.get(keyTemp));
+    	   }
+    	   
+       }
+
+       AndOrTempMap.clear();
 	   
-	   if(AndOrMap.size() == 0){
+	   if(AndOrMap.size() == 0 && AndOrTitleFinalMap.size()==0){
 		   
 		   System.out.println("Not found\n");
 		   return;
 		   
 	   }
 		   
-   
+	   	List<Entry<String, RankObject>> tokenPairList = new ArrayList<Entry<String, RankObject>>();
+
+	   	if(AndOrTitleFinalMap.size() > 0){
+	   		
+			List<Entry<String, RankObject>> tokenPairTitleList = new ArrayList<Entry<String, RankObject>>(AndOrTitleFinalMap.entrySet());
+			Collections.sort( tokenPairTitleList, new Comparator<Map.Entry<String, RankObject>>()
+			{
+				public int compare( Map.Entry<String, RankObject> mapEntry1, Map.Entry<String, RankObject> mapEntry2 )
+				{
+					return (new Integer(mapEntry2.getValue().qrWC)).compareTo( new Integer(mapEntry1.getValue().qrWC));
+				}
+			
+			} );
+
+		   	tokenPairList.addAll(tokenPairTitleList);
+
+	   	}
+
+	   	
+	   	if(AndOrMap.size()>0){
+		  
 	   Map<String,RankObject> AndOrMapTopOcc = new HashMap<String, RankObject>();
 	   Map<String,RankObject> AndOrMapTop = new HashMap<String, RankObject>();
 	   Map<String,RankObject> AndOrMapHigh = new HashMap<String, RankObject>();
@@ -283,12 +366,12 @@ public class MongoDB{
 		tokenPairLList = fnSort(AndOrMapLow);
 		
 	   	
-	   	List<Entry<String, RankObject>> tokenPairList = new ArrayList<Entry<String, RankObject>>();
 	   	tokenPairList.addAll(tokenPairTOList);
 	   	tokenPairList.addAll(tokenPairTList);
 	   	tokenPairList.addAll(tokenPairHList);
 	   	tokenPairList.addAll(tokenPairLList);
-
+	   }
+	   	
 		
 		int size = tokenPairList.size();
 		

@@ -103,7 +103,7 @@ public class SearchEngineMain{
 		MongoDB Mdb = new MongoDB();
 		
 //		Mdb.fnCalculateTFIDF();
-		Mdb.fnUpdateDocID("./Files/Result/IndexMap.txt");
+//		Mdb.fnUpdateDocID("./Files/Result/IndexMap.txt");
 		
 		while(true){
 			System.out.println("Enter the string to search");
